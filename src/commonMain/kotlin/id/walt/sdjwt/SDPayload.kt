@@ -1,0 +1,136 @@
+package id.walt.sdjwt
+
+import korlibs.crypto.SecureRandom
+import korlibs.crypto.encoding.Base64
+import korlibs.crypto.sha256
+import kotlinx.serialization.json.*
+
+data class SDPayload (
+  val undisclosedPayload: JsonObject,
+  val digestedDisclosures: Map<String, SDisclosure> = mapOf(),
+) {
+  val sDisclosures
+    get() = digestedDisclosures.values
+
+  val disclosedPayload
+    get() = disclosePayloadRecursively(undisclosedPayload)
+
+  private fun disclosePayloadRecursively(payload: JsonObject): JsonObject {
+    return buildJsonObject {
+      payload.forEach { entry ->
+        if(entry.key == SDJwt.DIGESTS_KEY) {
+          if(entry.value !is JsonArray) throw Exception("SD-JWT contains invalid ${SDJwt.DIGESTS_KEY} element")
+          entry.value.jsonArray.forEach {
+            unveilDisclosureIfPresent(it.jsonPrimitive.content, this)
+          }
+        } else if(entry.value is JsonObject) {
+          put(entry.key, disclosePayloadRecursively(entry.value.jsonObject))
+        } else {
+          put(entry.key, entry.value)
+        }
+      }
+    }
+  }
+
+  private fun unveilDisclosureIfPresent(digest: String, objectBuilder: JsonObjectBuilder) {
+    digestedDisclosures[digest]?.also { sDisclosure ->
+      objectBuilder.put(sDisclosure.key,
+        if(sDisclosure.value is JsonObject) {
+          disclosePayloadRecursively(sDisclosure.value.jsonObject)
+        } else sDisclosure.value
+      )
+    }
+  }
+
+  companion object {
+
+    private fun digest(value: String): String {
+      val messageDigest = value.encodeToByteArray().sha256()
+      return messageDigest.base64Url
+    }
+
+    private fun generateSalt(): String {
+      val randomness = SecureRandom.nextBytes(16)
+      return Base64.encode(randomness, url = true)
+    }
+
+    private fun generateDisclosure(key: String, value: JsonElement): SDisclosure {
+      val salt = generateSalt()
+      return Base64.encode(buildJsonArray {
+        add(salt)
+        add(key)
+        add(value)
+      }.toString().encodeToByteArray(), url = true).let { disclosure ->
+        SDisclosure(disclosure, salt, key, value)
+      }
+    }
+
+    private fun digestSDClaim(key: String, value: JsonElement, digests2disclosures: MutableMap<String, SDisclosure>): String {
+      val disclosure = generateDisclosure(key, value)
+      return digest(disclosure.disclosure).also {
+        digests2disclosures[it] = disclosure
+      }
+    }
+
+    private fun removeSDFields(payload: JsonObject, sdMap: Map<String, SDField>): JsonObject {
+      return JsonObject(payload.filterKeys { key -> sdMap[key]?.sd != true }.mapValues { entry ->
+        if (entry.value is JsonObject && !sdMap[entry.key]?.children.isNullOrEmpty()) {
+          removeSDFields(entry.value.jsonObject, sdMap[entry.key]?.children ?: mapOf())
+        } else {
+          entry.value
+        }
+      })
+    }
+
+    private fun generateSDPayload(payload: JsonObject, sdMap: Map<String, SDField>, digests2disclosures: MutableMap<String, SDisclosure>): JsonObject {
+      val sdPayload = removeSDFields(payload, sdMap).toMutableMap()
+      val digests = payload.filterKeys { key ->
+        // iterate over all fields that are selectively disclosable AND/OR have nested fields that might be:
+        sdMap[key]?.sd == true || !sdMap[key]?.children.isNullOrEmpty()
+      }.map { entry ->
+        if(entry.value !is JsonObject || sdMap[entry.key]?.children.isNullOrEmpty()) {
+          // this field has no nested elements and/or is selectively disclosable only as a whole:
+          digestSDClaim(entry.key, entry.value, digests2disclosures)
+        } else {
+          // the nested properties could be selectively disclosable individually
+          // recursively generate SD payload for nested object:
+          val nestedSDPayload = generateSDPayload(entry.value.jsonObject, sdMap[entry.key]!!.children!!, digests2disclosures)
+          if(sdMap[entry.key]?.sd == true) {
+            // this nested object is also selectively disclosable as a whole
+            // so let's compute the digest and disclosure for the nested SD payload:
+            digestSDClaim(entry.key, nestedSDPayload, digests2disclosures)
+          } else {
+            // this nested object is not selectively disclosable as a whole, add the nested SD payload as it is:
+            sdPayload[entry.key] = nestedSDPayload
+            // no digest/disclosure is added for this field (though the nested properties may have generated digests and disclosures)
+            null
+          }
+        }
+      }.filterNotNull().toSet()
+
+      if(digests.isNotEmpty()) {
+        sdPayload.put(SDJwt.DIGESTS_KEY, buildJsonArray {
+          digests.forEach { add(it) }
+        })
+      }
+      return JsonObject(sdPayload)
+    }
+
+    fun createSDPayload(payload: JsonObject, disclosureMap: Map<String, SDField>): SDPayload {
+      val digestedDisclosures = mutableMapOf<String, SDisclosure>()
+      return SDPayload(
+        undisclosedPayload = generateSDPayload(payload, disclosureMap, digestedDisclosures),
+        digestedDisclosures = digestedDisclosures
+      )
+    }
+
+    fun createSDPayload(jwtClaimsSet: JWTClaimsSet, disclosureMap: Map<String, SDField>)
+      = createSDPayload(Json.parseToJsonElement(jwtClaimsSet.toString()).jsonObject, disclosureMap)
+
+    fun createFrom(undisclosedPayload: JsonObject, disclosures: Set<String>): SDPayload {
+      return SDPayload(
+        undisclosedPayload,
+        disclosures.associate { Pair(digest(it), SDisclosure.parse(it)) })
+    }
+  }
+}
