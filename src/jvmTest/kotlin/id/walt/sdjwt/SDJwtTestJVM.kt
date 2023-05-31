@@ -1,9 +1,8 @@
 package id.walt.sdjwt
 
 import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.crypto.ECDSASigner
-import com.nimbusds.jose.jwk.Curve
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator
+import com.nimbusds.jose.crypto.MACSigner
+import com.nimbusds.jose.crypto.MACVerifier
 import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.assertions.json.shouldMatchJson
 import io.kotest.matchers.collections.shouldHaveSize
@@ -20,7 +19,8 @@ class SDJwtTestJVM {
     val originalClaimsSet = JWTClaimsSet.Builder().subject("123").audience("456").build()
     val sdPayload = SDPayload.createSDPayload(originalClaimsSet, JWTClaimsSet.Builder(originalClaimsSet).subject(null).build())
 
-    val cryptoProvider = HmacJWTCryptoProvider(JWSAlgorithm.HS256, korlibs.crypto.SecureRandom.nextBytes(32))
+    val sharedSecret =  korlibs.crypto.SecureRandom.nextBytes(32)
+    val cryptoProvider = SimpleJWTCryptoProvider(JWSAlgorithm.HS256, MACSigner(sharedSecret), MACVerifier(sharedSecret))
     val sdJwt = SDJwt.sign(sdPayload, cryptoProvider)
 
     sdJwt.sdPayload.undisclosedPayload shouldNotContainKey "sub"

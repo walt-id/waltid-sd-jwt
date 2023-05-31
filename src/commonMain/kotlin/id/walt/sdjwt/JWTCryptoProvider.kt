@@ -7,5 +7,4 @@ interface JWTCryptoProvider {
   fun verify(jwt: String): Boolean
 }
 
-expect abstract class SimpleJWTCryptoProvider : JWTCryptoProvider {
-}
+expect class SimpleJWTCryptoProvider : JWTCryptoProvider

@@ -2,7 +2,7 @@ package id.walt.sdjwt
 
 import kotlinx.serialization.json.JsonObject
 
-actual abstract class SimpleJWTCryptoProvider : JWTCryptoProvider {
+actual class SimpleJWTCryptoProvider : JWTCryptoProvider {
   override fun sign(payload: JsonObject, keyID: String?): String {
     TODO("Not yet implemented")
   }
