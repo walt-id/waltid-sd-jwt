@@ -1,11 +1,11 @@
 package id.walt.sdjwt
 
+import io.kotest.assertions.json.shouldMatchJson
+import io.kotest.matchers.collections.shouldNotContainAnyOf
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.maps.shouldNotContainKey
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.put
+import io.kotest.matchers.shouldNotBe
+import kotlinx.serialization.json.*
 import kotlin.test.Test
 
 class SDJwtTest {
@@ -18,8 +18,55 @@ class SDJwtTest {
     sdJwt.sdPayload.undisclosedPayload["vc"]!!.jsonObject shouldContainKey SDJwt.DIGESTS_KEY
     sdJwt.sdPayload.undisclosedPayload["vc"]!!.jsonObject shouldNotContainKey "credentialSubject"
 
-    sdJwt.sdPayload.disclosedPayload["vc"]!!.jsonObject shouldContainKey "credentialSubject"
+    sdJwt.sdPayload.fullPayload["vc"]!!.jsonObject shouldContainKey "credentialSubject"
 
-    println(sdJwt.sdPayload.disclosedPayload.toString())
+    println(sdJwt.sdPayload.fullPayload.toString())
+  }
+
+  @Test
+  fun testSDPayloadGeneration() {
+    val fullPayload = buildJsonObject {
+      put("sub", "1234")
+      put("nestedObject", buildJsonObject {
+        put("arrProp", buildJsonArray {
+          add("item 1")
+          add("item 2")
+        })
+      })
+    }
+
+    val sdPayload_1 = SDPayload.createSDPayload(fullPayload, buildJsonObject {  })
+
+    sdPayload_1.undisclosedPayload shouldContainKey SDJwt.DIGESTS_KEY
+    sdPayload_1.undisclosedPayload.keys shouldNotContainAnyOf setOf("sub", "nestedObject")
+    sdPayload_1.fullPayload.toString() shouldMatchJson fullPayload.toString()
+
+
+    val sdPayload_2 = SDPayload.createSDPayload(fullPayload, buildJsonObject {
+      put("nestedObject", buildJsonObject {  })
+    })
+
+    sdPayload_2.undisclosedPayload shouldContainKey SDJwt.DIGESTS_KEY
+    sdPayload_2.undisclosedPayload shouldContainKey "nestedObject"
+    sdPayload_2.undisclosedPayload shouldNotContainKey "sub"
+    sdPayload_2.undisclosedPayload["nestedObject"]!!.jsonObject shouldContainKey SDJwt.DIGESTS_KEY
+    sdPayload_2.undisclosedPayload["nestedObject"]!!.jsonObject shouldNotContainKey "arrProp"
+    sdPayload_2.fullPayload.toString() shouldMatchJson fullPayload.toString()
+
+
+    val sdPayload_3 = SDPayload.createSDPayload(fullPayload, mapOf(
+      "sub" to SDField(true),
+      "nestedObject" to SDField(true, mapOf(
+        "arrProp" to SDField(true)
+      ))
+    ))
+
+    sdPayload_3.undisclosedPayload shouldContainKey SDJwt.DIGESTS_KEY
+    sdPayload_3.undisclosedPayload.keys shouldNotContainAnyOf setOf("sub", "nestedObject")
+    val nestedDisclosure = sdPayload_3.sDisclosures.firstOrNull() { sd -> sd.key == "nestedObject" && sd.value is JsonObject }
+    nestedDisclosure shouldNotBe null
+    nestedDisclosure!!.value.jsonObject shouldContainKey SDJwt.DIGESTS_KEY
+    nestedDisclosure.value.jsonObject shouldNotContainKey "arrProp"
+    sdPayload_3.fullPayload.toString() shouldMatchJson fullPayload.toString()
   }
 }
