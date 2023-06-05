@@ -2,8 +2,10 @@ package id.walt.sdjwt
 
 import io.kotest.assertions.json.shouldMatchJson
 import io.kotest.matchers.collections.shouldNotContainAnyOf
+import io.kotest.matchers.ints.shouldBeInRange
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.maps.shouldNotContainKey
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.serialization.json.*
 import kotlin.test.Test
@@ -40,6 +42,7 @@ class SDJwtTest {
     sdPayload_1.undisclosedPayload shouldContainKey SDJwt.DIGESTS_KEY
     sdPayload_1.undisclosedPayload.keys shouldNotContainAnyOf setOf("sub", "nestedObject")
     sdPayload_1.fullPayload.toString() shouldMatchJson fullPayload.toString()
+    sdPayload_1.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray.size shouldBe sdPayload_1.digestedDisclosures.size
 
 
     val sdPayload_2 = SDPayload.createSDPayload(fullPayload, buildJsonObject {
@@ -52,14 +55,16 @@ class SDJwtTest {
     sdPayload_2.undisclosedPayload["nestedObject"]!!.jsonObject shouldContainKey SDJwt.DIGESTS_KEY
     sdPayload_2.undisclosedPayload["nestedObject"]!!.jsonObject shouldNotContainKey "arrProp"
     sdPayload_2.fullPayload.toString() shouldMatchJson fullPayload.toString()
+    (sdPayload_2.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray.size +
+    sdPayload_2.undisclosedPayload["nestedObject"]!!.jsonObject[SDJwt.DIGESTS_KEY]!!.jsonArray.size) shouldBe sdPayload_2.digestedDisclosures.size
 
 
     val sdPayload_3 = SDPayload.createSDPayload(fullPayload, mapOf(
       "sub" to SDField(true),
       "nestedObject" to SDField(true, mapOf(
         "arrProp" to SDField(true)
-      ))
-    ))
+      ).toSDMap())
+    ).toSDMap())
 
     sdPayload_3.undisclosedPayload shouldContainKey SDJwt.DIGESTS_KEY
     sdPayload_3.undisclosedPayload.keys shouldNotContainAnyOf setOf("sub", "nestedObject")
@@ -68,5 +73,38 @@ class SDJwtTest {
     nestedDisclosure!!.value.jsonObject shouldContainKey SDJwt.DIGESTS_KEY
     nestedDisclosure.value.jsonObject shouldNotContainKey "arrProp"
     sdPayload_3.fullPayload.toString() shouldMatchJson fullPayload.toString()
+    sdPayload_3.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray.size +
+        nestedDisclosure.value.jsonObject[SDJwt.DIGESTS_KEY]!!.jsonArray.size shouldBe sdPayload_3.digestedDisclosures.size
+  }
+
+  @Test
+  fun testSDPayloadGenerationWithDecoys() {
+    val fullPayload = buildJsonObject {
+      put("sub", "1234")
+      put("nestedObject", buildJsonObject {
+        put("arrProp", buildJsonArray {
+          add("item 1")
+          add("item 2")
+        })
+      })
+    }
+
+    val sdPayload_4 = SDPayload.createSDPayload(fullPayload, mapOf(
+      "sub" to SDField(true),
+      "nestedObject" to SDField(true, mapOf(
+        "arrProp" to SDField(true)
+      ).toSDMap(decoyMode = DecoyMode.FIXED, decoys = 5))
+    ).toSDMap(decoyMode = DecoyMode.RANDOM, decoys = 5))
+
+    sdPayload_4.undisclosedPayload shouldContainKey SDJwt.DIGESTS_KEY
+    sdPayload_4.undisclosedPayload.keys shouldNotContainAnyOf setOf("sub", "nestedObject")
+    val nestedDisclosure = sdPayload_4.sDisclosures.firstOrNull() { sd -> sd.key == "nestedObject" && sd.value is JsonObject }
+    nestedDisclosure shouldNotBe null
+    nestedDisclosure!!.value.jsonObject shouldContainKey SDJwt.DIGESTS_KEY
+    nestedDisclosure.value.jsonObject shouldNotContainKey "arrProp"
+    val numSdFieldsLevel1 = sdPayload_4.sdMap.count { it.value.sd }
+    sdPayload_4.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray.size shouldBeInRange IntRange(numSdFieldsLevel1+1, numSdFieldsLevel1 + 5)
+    val numSdFieldsLevel2 = sdPayload_4.sdMap["nestedObject"]!!.children!!.count { it.value.sd }
+    nestedDisclosure.value.jsonObject[SDJwt.DIGESTS_KEY]!!.jsonArray.size shouldBe numSdFieldsLevel2 + 5
   }
 }

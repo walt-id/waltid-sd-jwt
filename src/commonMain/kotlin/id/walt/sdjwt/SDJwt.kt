@@ -95,5 +95,9 @@ class SDJwt (
         holderJwt = withHolderJwt
      )
     }
+
+    fun isSDJwt(value: String): Boolean {
+      return Regex(SD_JWT_PATTERN).matches(value)
+    }
   }
 }

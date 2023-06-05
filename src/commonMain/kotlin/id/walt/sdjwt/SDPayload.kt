@@ -2,6 +2,7 @@ package id.walt.sdjwt
 
 import korlibs.crypto.SecureRandom
 import korlibs.crypto.encoding.Base64
+import korlibs.crypto.encoding.base64Url
 import korlibs.crypto.sha256
 import kotlinx.serialization.json.*
 
@@ -14,6 +15,9 @@ data class SDPayload (
 
   val fullPayload
     get() = disclosePayloadRecursively(undisclosedPayload, null)
+
+  val sdMap
+    get() = SDMap.regenerateSDMap(undisclosedPayload, digestedDisclosures)
 
   private fun disclosePayloadRecursively(payload: JsonObject, verificationDisclosureMap: MutableMap<String, SDisclosure>?): JsonObject {
     return buildJsonObject {
@@ -119,7 +123,7 @@ data class SDPayload (
       })
     }
 
-    private fun generateSDPayload(payload: JsonObject, sdMap: Map<String, SDField>, digests2disclosures: MutableMap<String, SDisclosure>): JsonObject {
+    private fun generateSDPayload(payload: JsonObject, sdMap: SDMap, digests2disclosures: MutableMap<String, SDisclosure>): JsonObject {
       val sdPayload = removeSDFields(payload, sdMap).toMutableMap()
       val digests = payload.filterKeys { key ->
         // iterate over all fields that are selectively disclosable AND/OR have nested fields that might be:
@@ -148,12 +152,23 @@ data class SDPayload (
       if(digests.isNotEmpty()) {
         sdPayload.put(SDJwt.DIGESTS_KEY, buildJsonArray {
           digests.forEach { add(it) }
+          if(sdMap.decoyMode != DecoyMode.NONE && sdMap.decoys > 0) {
+            val numDecoys = when(sdMap.decoyMode) {
+              // NOTE: SecureRandom.nextInt always returns 0! Use nextDouble instead
+              DecoyMode.RANDOM -> SecureRandom.nextDouble(1.0, sdMap.decoys+1.0).toInt()
+              DecoyMode.FIXED -> sdMap.decoys
+              else -> 0
+            }
+            repeat(numDecoys) {
+              add(digest(SecureRandom.nextBytes(32).base64Url))
+            }
+          }
         })
       }
       return JsonObject(sdPayload)
     }
 
-    fun createSDPayload(fullPayload: JsonObject, disclosureMap: Map<String, SDField>): SDPayload {
+    fun createSDPayload(fullPayload: JsonObject, disclosureMap: SDMap): SDPayload {
       val digestedDisclosures = mutableMapOf<String, SDisclosure>()
       return SDPayload(
         undisclosedPayload = generateSDPayload(fullPayload, disclosureMap, digestedDisclosures),
@@ -161,14 +176,18 @@ data class SDPayload (
       )
     }
 
-    fun createSDPayload(jwtClaimsSet: JWTClaimsSet, disclosureMap: Map<String, SDField>)
+    fun createSDPayload(jwtClaimsSet: JWTClaimsSet, disclosureMap: SDMap)
       = createSDPayload(Json.parseToJsonElement(jwtClaimsSet.toString()).jsonObject, disclosureMap)
 
-    fun createSDPayload(fullPayload: JsonObject, undisclosedPayload: JsonObject)
-      = createSDPayload(fullPayload, SDField.generateSdMap(fullPayload, undisclosedPayload))
+    fun createSDPayload(fullPayload: JsonObject, undisclosedPayload: JsonObject, decoyMode: DecoyMode = DecoyMode.NONE, decoys: Int = 0)
+      = createSDPayload(fullPayload, SDMap.generateSDMap(fullPayload, undisclosedPayload, decoyMode, decoys))
 
-    fun createSDPayload(fullJWTClaimsSet: JWTClaimsSet, undisclosedJWTClaimsSet: JWTClaimsSet)
-      = createSDPayload(Json.parseToJsonElement(fullJWTClaimsSet.toString()).jsonObject, Json.parseToJsonElement(undisclosedJWTClaimsSet.toString()).jsonObject)
+    fun createSDPayload(fullJWTClaimsSet: JWTClaimsSet, undisclosedJWTClaimsSet: JWTClaimsSet, decoyMode: DecoyMode = DecoyMode.NONE, decoys: Int = 0)
+      = createSDPayload(
+        Json.parseToJsonElement(fullJWTClaimsSet.toString()).jsonObject,
+        Json.parseToJsonElement(undisclosedJWTClaimsSet.toString()).jsonObject,
+        decoyMode, decoys
+      )
 
     fun createFrom(undisclosedPayload: JsonObject, disclosures: Set<String>): SDPayload {
       return SDPayload(
