@@ -160,7 +160,7 @@ data class SDPayload (
               else -> 0
             }
             repeat(numDecoys) {
-              add(digest(SecureRandom.nextBytes(32).base64Url))
+              add(digest(generateSalt()))
             }
           }
         })
