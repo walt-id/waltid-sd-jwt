@@ -2,20 +2,33 @@ package id.walt.sdjwt
 
 import korlibs.crypto.SecureRandom
 import korlibs.crypto.encoding.Base64
-import korlibs.crypto.encoding.base64Url
 import korlibs.crypto.sha256
 import kotlinx.serialization.json.*
 
+/**
+ * Payload object of the SD-JWT, representing the undisclosed payload from the JWT body and the selective disclosures, appended to the JWT token
+ * @param undisclosedPayload  Undisclosed payload JSON object, as contained in the JWT body
+ * @param digestedDisclosures Map of digests to parsed disclosures, which are appended to the JWT token
+ */
 data class SDPayload (
   val undisclosedPayload: JsonObject,
   val digestedDisclosures: Map<String, SDisclosure> = mapOf(),
 ) {
+  /**
+   * Flat list of parsed disclosures, appended to the JWT token
+   */
   val sDisclosures
     get() = digestedDisclosures.values
 
+  /**
+   * Full payload, with all (selected) disclosures resolved recursively
+   */
   val fullPayload
     get() = disclosePayloadRecursively(undisclosedPayload, null)
 
+  /**
+   * SDMap regenerated from undisclosed payload and disclosures.
+   */
   val sdMap
     get() = SDMap.regenerateSDMap(undisclosedPayload, digestedDisclosures)
 
@@ -70,15 +83,25 @@ data class SDPayload (
     ).toSet()
   }
 
+  /**
+   * Payload with selectively disclosed fields and undisclosed fields filtered out.
+   * @param sdMap Map indicating per field (recursively) whether they are selected for disclosure
+   */
   fun withSelectiveDisclosures(sdMap: Map<String, SDField>): SDPayload {
     val selectedDisclosures = filterDisclosures(undisclosedPayload, sdMap)
     return SDPayload(undisclosedPayload, digestedDisclosures.filterValues { selectedDisclosures.contains(it.disclosure) })
   }
 
+  /**
+   * Payload with all selectively dislosable fields filtered out (all fields undisclosed)
+   */
   fun withoutDisclosures(): SDPayload {
     return SDPayload(undisclosedPayload, mapOf())
   }
 
+  /**
+   * Verify digests in JWT payload match with disclosures appended to JWT token.
+   */
   fun verifyDisclosures() = digestedDisclosures.toMutableMap().also {
     disclosePayloadRecursively(undisclosedPayload, it)
   }.isEmpty()
@@ -168,6 +191,11 @@ data class SDPayload (
       return JsonObject(sdPayload)
     }
 
+    /**
+     * Create SD payload object, based on full payload and disclosure map
+     * @param fullPayload Full payload with all fields contained
+     * @param disclosureMap SDMap indicating selective disclosure for each payload field recursively, and decoy properties for issuance
+     */
     fun createSDPayload(fullPayload: JsonObject, disclosureMap: SDMap): SDPayload {
       val digestedDisclosures = mutableMapOf<String, SDisclosure>()
       return SDPayload(
@@ -176,12 +204,31 @@ data class SDPayload (
       )
     }
 
+    /**
+     * Create SD payload with JWT claims set (from platform dependent claims set object) and disclosure map
+     * @param jwtClaimsSet Full payload with all fields contained
+     * @param disclosureMap SDMap indicating selective disclosure for each payload field recursively, and decoy properties for issuance
+     */
     fun createSDPayload(jwtClaimsSet: JWTClaimsSet, disclosureMap: SDMap)
       = createSDPayload(Json.parseToJsonElement(jwtClaimsSet.toString()).jsonObject, disclosureMap)
 
+    /**
+     * Create SD payload based on full payload and undisclosed payload
+     * @param fullPayload Full payload containing all fields
+     * @param undisclosedPayload  Payload with selectively disclosable fields removed
+     * @param decoyMode **For SD-JWT issuance:** Generate decoy digests for this hierarchical level randomly or fixed, set to NONE for parsed SD-JWTs, **for presentation:** _unused_
+     * @param decoys  **For SD-JWT issuance:** Num (fixed mode) or max num (random mode) of decoy digests to add for this hierarchical level. 0 if NONE, **for presentation:** _unused_.
+     */
     fun createSDPayload(fullPayload: JsonObject, undisclosedPayload: JsonObject, decoyMode: DecoyMode = DecoyMode.NONE, decoys: Int = 0)
       = createSDPayload(fullPayload, SDMap.generateSDMap(fullPayload, undisclosedPayload, decoyMode, decoys))
 
+    /**
+     * Create SD payload based on full payload as JWT claims set and undisclosed payload
+     * @param fullJWTClaimsSet Full payload containing all fields
+     * @param undisclosedPayload  Payload with selectively disclosable fields removed
+     * @param decoyMode **For SD-JWT issuance:** Generate decoy digests for this hierarchical level randomly or fixed, set to NONE for parsed SD-JWTs, **for presentation:** _unused_
+     * @param decoys  **For SD-JWT issuance:** Num (fixed mode) or max num (random mode) of decoy digests to add for this hierarchical level. 0 if NONE, **for presentation:** _unused_.
+     */
     fun createSDPayload(fullJWTClaimsSet: JWTClaimsSet, undisclosedJWTClaimsSet: JWTClaimsSet, decoyMode: DecoyMode = DecoyMode.NONE, decoys: Int = 0)
       = createSDPayload(
         Json.parseToJsonElement(fullJWTClaimsSet.toString()).jsonObject,
@@ -189,9 +236,14 @@ data class SDPayload (
         decoyMode, decoys
       )
 
-    fun createFrom(undisclosedPayload: JsonObject, disclosures: Set<String>): SDPayload {
+    /**
+     * Parse SD payload from JWT body and disclosure strings appended to JWT token
+     * @param jwtBody  Undisclosed JWT body payload
+     * @param disclosures Encoded disclosure string, as appended to JWT token
+     */
+    fun parse(jwtBody: String, disclosures: Set<String>): SDPayload {
       return SDPayload(
-        undisclosedPayload,
+        Json.parseToJsonElement(Base64.decode(jwtBody, url = true).decodeToString()).jsonObject,
         disclosures.associate { Pair(digest(it), SDisclosure.parse(it)) })
     }
   }

@@ -6,6 +6,13 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 
+/**
+ * Selective Disclosure for a given payload field. Contains salt, field key and field value.
+ * @param disclosure  The encoded disclosure, as given in the SD-JWT token.
+ * @param salt  Salt value
+ * @param key Field key
+ * @param value Field value
+ */
 data class SDisclosure(
   val disclosure: String,
   val salt: String,
@@ -13,6 +20,9 @@ data class SDisclosure(
   val value: JsonElement
 ) {
   companion object {
+    /**
+     * Parse an encoded disclosure string
+     */
     fun parse(disclosure: String) = Json.parseToJsonElement(Base64.decode(disclosure, url = true).decodeToString()).jsonArray.let {
       if(it.size != 3) {
         throw Exception("Invalid selective disclosure")
