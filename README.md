@@ -243,8 +243,48 @@ Disclosed JWT payload:
 
 #### Integrate with custom JWT crypto provider
 
+To integrate with your custom JWT crypto provider, on your platform, you need to override and implement the `JWTCryptoProvider` interface, which has two interface methods to sign and verify standard JWT tokens.
 
+In this example, you see how I made use of this interface to implement the JWT crypto provider based on the NimbusDS Jose/JWT library for JVM:
 
+```kotlin
+class SimpleJWTCryptoProvider(
+  val jwsAlgorithm: JWSAlgorithm,
+  private val jwsSigner: JWSSigner?,
+  private val jwsVerifier: JWSVerifier?
+) : JWTCryptoProvider {
+
+  /**
+   * Interface method to create a signed JWT for the given JSON payload object, with an optional keyID.
+   * @param payload The JSON payload of the JWT to be signed
+   * @param keyID Optional keyID of the signing key to be used, if required by crypto provider
+   */
+  override fun sign(payload: JsonObject, keyID: String?): String {
+    if(jwsSigner == null) {
+      throw Exception("No signer available")
+    }
+    return SignedJWT(
+      JWSHeader.Builder(jwsAlgorithm).type(JOSEObjectType.JWT).keyID(keyID).build(),
+      JWTClaimsSet.parse(payload.toString())
+    ).also {
+      it.sign(jwsSigner)
+    }.serialize()
+  }
+
+  /**
+   * Interface method for verifying a JWT signature
+   * @param jwt A signed JWT token to be verified
+   */
+  override fun verify(jwt: String): Boolean {
+    if(jwsVerifier == null) {
+      throw Exception("No verifier available")
+    }
+    return SignedJWT.parse(jwt).verify(jwsVerifier)
+  }
+}
+```
+
+The custom JWT crypto provider can now be used like shown in the examples above, for [signing](#create-and-sign-an-sd-jwt-using-the-nimbusds-based-jwt-crypto-provider) and [verifying](#parse-and-verify-an-sd-jwt-using-the-nimbusds-based-jwt-crypto-provider) SD-JWTs.
 
 ## Join the community
 
