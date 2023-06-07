@@ -21,30 +21,7 @@ TODO: Add links to example code
 * Parse and verify SD-JWT tokens, resolving original payload with disclosed fields
 * Integrate with your choice of framework or library, on your platform, for cryptography and key management
 * Multiplatform support: Java/JVM, JavaScript, Native 
-
-### Include as dependency
-
-#### JVM (Java/Kotlin)
-**Maven**
-
-```xml
-<dependency>
-    <groupId>id.walt</groupId>
-    <artifactId>waltid-sd-jwt-jvm</artifactId>
-    <version>[ version ]</version>
-</dependency>
-```
-
-**Gradle**
-
-_Kotlin DSL_
-```kotlin
-val sdJwtVersion = "1.2306071235.0"
-[...]
-dependencies {
-  implementation("id.walt:waltid-sd-jwt-jvm:$sdJwtVersion")
-}
-```
+* [Usage with Java or Kotlin on JVM](#usage-with-java--kotlin-and-jvm)
 
 ### Further information
 
@@ -74,6 +51,28 @@ This libary implements the **Selective Disclosure JWT (SD-JWT)** specification: 
   * JavaScript
   * Native
 
+## Usage with Java / Kotlin and JVM
+
+**Maven**
+
+```xml
+<dependency>
+    <groupId>id.walt</groupId>
+    <artifactId>waltid-sd-jwt-jvm</artifactId>
+    <version>[ version ]</version>
+</dependency>
+```
+
+**Gradle**
+
+_Kotlin DSL_
+```kotlin
+val sdJwtVersion = "1.2306071235.0"
+[...]
+dependencies {
+  implementation("id.walt:waltid-sd-jwt-jvm:$sdJwtVersion")
+}
+```
 
 ## Example
 TODO: Desribe code examples
