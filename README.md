@@ -137,9 +137,63 @@ _Example output_
 
 `eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~WyJ4RFk5VjBtOG43am82ZURIUGtNZ1J3Iiwic3ViIiwiMTIzIl0`
 
+_Parsed JWT body_
+
+```json
+{
+  "aud": "456",
+  "_sd": [
+    "hlzfjf04o5ZsLR25ha4c-Y-9HW2DUlxcgiMYd324NgY"
+  ]
+}
+```
+
 #### Present an SD-JWT
 
+In this example we parse the SD-JWT generated in the previous example, and present it by disclosing all, none or selective fields.
+
+In the next example we will show how to parse and verify the presented SD-JWTs.
+
+```kotlin
+fun presentSDJwt() {
+  // parse previously created SD-JWT
+  val sdJwt = SDJwt.parse("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~WyJ4RFk5VjBtOG43am82ZURIUGtNZ1J3Iiwic3ViIiwiMTIzIl0")
+
+  // present without disclosing SD fields
+  val presentedUndisclosedJwt = sdJwt.present(discloseAll = false)
+  println(presentedUndisclosedJwt)
+
+  // present disclosing all SD fields
+  val presentedDisclosedJwt = sdJwt.present(discloseAll = true)
+  println(presentedDisclosedJwt)
+
+  // present disclosing selective fields, using SDMap
+  val presentedSelectiveJwt = sdJwt.present(mapOf(
+    "sub" to SDField(true)
+  ).toSDMap())
+  println(presentedSelectiveJwt)
+
+  // present disclosing fields, using JSON paths
+  val presentedSelectiveJwt2 = sdJwt.present(
+    SDMap.generateSDMap(listOf("sub"))
+  )
+  println(presentedSelectiveJwt2)
+  
+}
+```
+
+_Example output_
+
+```text
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~WyJ4RFk5VjBtOG43am82ZURIUGtNZ1J3Iiwic3ViIiwiMTIzIl0~
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~WyJ4RFk5VjBtOG43am82ZURIUGtNZ1J3Iiwic3ViIiwiMTIzIl0~
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~WyJ4RFk5VjBtOG43am82ZURIUGtNZ1J3Iiwic3ViIiwiMTIzIl0~
+```
+
 #### Parse and verify an SD-JWT using the NimbusDS-based JWT crypto provider
+
+
 
 #### Integrate with custom JWT crypto provider
 

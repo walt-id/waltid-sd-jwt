@@ -14,10 +14,11 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 
 class SDJwtTestJVM {
+  // Generate shared secret for HMAC crypto algorithm
+  private val sharedSecret = "ef23f749-7238-481a-815c-f0c2157dfa8e"
+
   @Test
   fun testSignJwt() {
-    // Generate shared secret for HMAC crypto algorithm
-    val sharedSecret =  "ef23f749-7238-481a-815c-f0c2157dfa8e"
 
     // Create SimpleJWTCryptoProvider with MACSigner and MACVerifier
     val cryptoProvider = SimpleJWTCryptoProvider(JWSAlgorithm.HS256, MACSigner(sharedSecret), MACVerifier(sharedSecret))
@@ -49,5 +50,35 @@ class SDJwtTestJVM {
     sdJwt.sdPayload.fullPayload.toString() shouldMatchJson originalClaimsSet.toString()
 
     sdJwt.verify(cryptoProvider) shouldBe true
+  }
+
+  @Test
+  fun presentSDJwt() {
+    // parse previously created SD-JWT
+    val sdJwt = SDJwt.parse("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~WyJ4RFk5VjBtOG43am82ZURIUGtNZ1J3Iiwic3ViIiwiMTIzIl0")
+
+    // present without disclosing SD fields
+    val presentedUndisclosedJwt = sdJwt.present(discloseAll = false)
+    println(presentedUndisclosedJwt)
+
+    // present disclosing all SD fields
+    val presentedDisclosedJwt = sdJwt.present(discloseAll = true)
+    println(presentedDisclosedJwt)
+
+    // present disclosing selective fields, using SDMap
+    val presentedSelectiveJwt = sdJwt.present(mapOf(
+      "sub" to SDField(true)
+    ).toSDMap())
+    println(presentedSelectiveJwt)
+
+    // present disclosing fields, using JSON paths
+    val presentedSelectiveJwt2 = sdJwt.present(SDMap.generateSDMap(listOf("sub")))
+    println(presentedSelectiveJwt2)
+
+  }
+
+  @Test
+  fun parseAndVerify() {
+    //val presentedUndisclosedJwt
   }
 }

@@ -10,7 +10,8 @@ class SDJwt (
   val jwt: String,
   val header: JsonObject,
   val sdPayload: SDPayload,
-  val holderJwt: String? = null
+  val holderJwt: String? = null,
+  val isPresentation: Boolean = false
 ) {
   /**
    * Encoded disclosures, included in this SD-JWT
@@ -36,7 +37,7 @@ class SDJwt (
   val jwk
     get() = header["jwk"]?.jsonPrimitive?.contentOrNull
 
-  override fun toString() = toString(false)
+  override fun toString() = toString(isPresentation)
 
   fun toString(formatForPresentation: Boolean): String {
     return listOf(jwt)
@@ -50,12 +51,12 @@ class SDJwt (
    * @param sdMap Selective disclosure map, indicating for each field (recursively) whether it should be disclosed or undisclosed in the presentation
    * @param withHolderJwt Optionally, adds the provided JWT as holder binding to the presented SD-JWT token
    */
-  fun present(sdMap: Map<String, SDField>?, withHolderJwt: String? = null): SDJwt {
+  fun present(sdMap: SDMap?, withHolderJwt: String? = null): SDJwt {
     return SDJwt(
       jwt,
       header,
       sdMap?.let { sdPayload.withSelectiveDisclosures(it) } ?: sdPayload.withoutDisclosures(),
-      withHolderJwt ?: holderJwt)
+      withHolderJwt ?: holderJwt, isPresentation = true)
   }
 
   /**
@@ -72,7 +73,7 @@ class SDJwt (
       } else {
         sdPayload.withoutDisclosures()
       },
-      withHolderJwt ?: holderJwt
+      withHolderJwt ?: holderJwt, isPresentation = true
     )
   }
 
