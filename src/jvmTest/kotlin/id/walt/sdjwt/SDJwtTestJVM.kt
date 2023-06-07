@@ -16,12 +16,20 @@ import kotlin.test.Test
 class SDJwtTestJVM {
   @Test
   fun testSignJwt() {
-    val originalClaimsSet = JWTClaimsSet.Builder().subject("123").audience("456").build()
-    val sdPayload = SDPayload.createSDPayload(originalClaimsSet, JWTClaimsSet.Builder(originalClaimsSet).subject(null).build())
+    val originalClaimsSet = JWTClaimsSet.Builder()
+      .subject("123")
+      .audience("456")
+    .build()
+    val sdPayload = SDPayload.createSDPayload(
+      originalClaimsSet,
+      JWTClaimsSet.Builder(originalClaimsSet)
+        .subject(null)
+      .build())
 
     val sharedSecret =  korlibs.crypto.SecureRandom.nextBytes(32)
     val cryptoProvider = SimpleJWTCryptoProvider(JWSAlgorithm.HS256, MACSigner(sharedSecret), MACVerifier(sharedSecret))
     val sdJwt = SDJwt.sign(sdPayload, cryptoProvider)
+    println(sdJwt)
 
     sdJwt.sdPayload.undisclosedPayload shouldNotContainKey "sub"
     sdJwt.sdPayload.undisclosedPayload shouldContainKey SDJwt.DIGESTS_KEY

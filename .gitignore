@@ -34,3 +34,5 @@ hs_err_pid*
 replay_pid*
 
 yarn.lock
+/secret_maven_password.txt
+/secret_maven_username.txt
