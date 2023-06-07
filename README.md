@@ -14,14 +14,11 @@
 
 ## Getting Started
 
-TODO: Add links to example code
-
+* [Usage with Maven or Gradle (JVM)](#usage-with-maven-or-gradle-jvm)
 * [Sign SD-JWT tokens](#create-and-sign-an-sd-jwt-using-the-nimbusds-based-jwt-crypto-provider)
 * [Present SD-JWT tokens with selection of disclosed and undisclosed payload fields](#present-an-sd-jwt)
 * [Parse and verify SD-JWT tokens, resolving original payload with disclosed fields](#parse-and-verify-an-sd-jwt-using-the-nimbusds-based-jwt-crypto-provider)
-* [Integrate with your choice of framework or library, on your platform, for cryptography and key management](#integrate-with-custom-jwt-crypto-provider)
-* Multiplatform support: Java/JVM, JavaScript, Native 
-* [Usage with Maven or Gradle (JVM)](#usage-with-maven-or-gradle-jvm)
+* [Integrate with your choice of framework or library, for cryptography and key management, on your platform](#integrate-with-custom-jwt-crypto-provider)
 
 ### Further information
 
