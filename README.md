@@ -22,6 +22,32 @@ TODO: Add links to example code
 * Integrate with your choice of framework or library, on your platform, for cryptography and key management
 * Multiplatform support: Java/JVM, JavaScript, Native 
 
+### Include as dependency
+
+#### JVM (Java/Kotlin)
+**Maven**
+
+```xml
+<dependency>
+    <groupId>id.walt</groupId>
+    <artifactId>waltid-sd-jwt-jvm</artifactId>
+    <version>[ version ]</version>
+</dependency>
+```
+
+**Gradle**
+
+_Kotlin DSL_
+```kotlin
+val sdJwtVersion = "1.2306071235.0"
+[...]
+dependencies {
+  implementation("id.walt:waltid-sd-jwt-jvm:$sdJwtVersion")
+}
+```
+
+### Further information
+
 Checkout the [documentation regarding SD-JWTs](https://docs.walt.id/v/ssikit/concepts/selective-disclosure), to find out more.
 
 ## What is the SD-JWT library?
