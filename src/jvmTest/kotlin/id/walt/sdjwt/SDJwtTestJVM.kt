@@ -79,6 +79,29 @@ class SDJwtTestJVM {
 
   @Test
   fun parseAndVerify() {
-    //val presentedUndisclosedJwt
+    // Create SimpleJWTCryptoProvider with MACSigner and MACVerifier
+    val cryptoProvider = SimpleJWTCryptoProvider(JWSAlgorithm.HS256, jwsSigner = null, jwsVerifier = MACVerifier(sharedSecret))
+
+    val undisclosedJwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~"
+
+    // verify and parse presented SD-JWT with all fields undisclosed, throws Exception if verification fails!
+    val parsedVerifiedUndisclosedJwt = SDJwt.verifyAndParse(undisclosedJwt, cryptoProvider)
+
+    // print full payload with disclosed fields only
+    println("Undisclosed JWT payload:")
+    println(parsedVerifiedUndisclosedJwt.sdPayload.fullPayload.toString())
+
+    // alternatively parse and verify in 2 steps:
+    val parsedUndisclosedJwt = SDJwt.parse(undisclosedJwt)
+    val isValid = parsedUndisclosedJwt.verify(cryptoProvider)
+    println("Undisclosed SD-JWT verified: $isValid")
+
+    val parsedVerifiedDisclosedJwt = SDJwt.verifyAndParse(
+      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~WyJ4RFk5VjBtOG43am82ZURIUGtNZ1J3Iiwic3ViIiwiMTIzIl0~",
+      cryptoProvider
+    )
+    // print full payload with disclosed fields
+    println("Disclosed JWT payload:")
+    println(parsedVerifiedDisclosedJwt.sdPayload.fullPayload.toString())
   }
 }

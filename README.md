@@ -193,7 +193,56 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVp
 
 #### Parse and verify an SD-JWT using the NimbusDS-based JWT crypto provider
 
+This example shows how to parse and verify the SD-JWT, created and presented in the previous examples, and how to restore its original payload, with the disclosed payload fields only.
 
+For verification, we use the same shared secret as before and a `MACVerifier` with the `SimpleJWTCryptoProvider`.
+
+The parsing and verification can be done in one step using the `SDJwt.verifyAndParse()` method, throwing an exception if verification fails, 
+or in two steps using the `SDJwt.parse()` method followed by the member method `SDJwt.verify()`, which returns true or false.
+
+The output below shows the restored JWT body payloads, with the selectively disclosable field `sub` disclosed or undisclosed.
+```kotlin
+// Generate shared secret for HMAC crypto algorithm
+private val sharedSecret = "ef23f749-7238-481a-815c-f0c2157dfa8e"
+
+fun parseAndVerify() {
+  // Create SimpleJWTCryptoProvider with MACSigner and MACVerifier
+  val cryptoProvider = SimpleJWTCryptoProvider(JWSAlgorithm.HS256, jwsSigner = null, jwsVerifier = MACVerifier(sharedSecret))
+
+  val undisclosedJwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~"
+
+  // verify and parse presented SD-JWT with all fields undisclosed, throws Exception if verification fails!
+  val parsedVerifiedUndisclosedJwt = SDJwt.verifyAndParse(undisclosedJwt, cryptoProvider)
+
+  // print full payload with disclosed fields only
+  println("Undisclosed JWT payload:")
+  println(parsedVerifiedUndisclosedJwt.sdPayload.fullPayload.toString())
+
+  // alternatively parse and verify in 2 steps:
+  val parsedUndisclosedJwt = SDJwt.parse(undisclosedJwt)
+  val isValid = parsedUndisclosedJwt.verify(cryptoProvider)
+  println("Undisclosed SD-JWT verified: $isValid")
+
+  val parsedVerifiedDisclosedJwt = SDJwt.verifyAndParse(
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~WyJ4RFk5VjBtOG43am82ZURIUGtNZ1J3Iiwic3ViIiwiMTIzIl0~",
+    cryptoProvider
+  )
+  // print full payload with disclosed fields
+  println("Disclosed JWT payload:")
+  println(parsedVerifiedDisclosedJwt.sdPayload.fullPayload.toString())
+}
+
+```
+
+_Example output_
+
+```text
+Undisclosed JWT payload:
+{"aud":"456"}
+Undisclosed SD-JWT verified: true
+Disclosed JWT payload:
+{"aud":"456","sub":"123"}
+```
 
 #### Integrate with custom JWT crypto provider
 
