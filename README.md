@@ -14,7 +14,13 @@
 
 ## Getting Started
 
-TODO: Add an intro what can/should be done with this lib
+TODO: Add links to example code
+
+* Sign SD-JWT tokens
+* Present SD-JWT tokens with selection of disclosed and undisclosed payload fields
+* Parse and verify SD-JWT tokens, resolving original payload with disclosed fields
+* Integrate with your choice of framework or library, on your platform, for cryptography and key management
+* Multiplatform support: Java/JVM, JavaScript, Native 
 
 Checkout the [documentation regarding SD-JWTs](https://docs.walt.id/v/ssikit/concepts/selective-disclosure), to find out more.
 
@@ -23,7 +29,21 @@ Checkout the [documentation regarding SD-JWTs](https://docs.walt.id/v/ssikit/con
 This libary implements the **Selective Disclosure JWT (SD-JWT)** specification:  [draft-ietf-oauth-selective-disclosure-jwt-04](https://datatracker.ietf.org/doc/draft-ietf-oauth-selective-disclosure-jwt/04/).
 
 ### Features
-TODO: List main features
+
+* **Create and sign** SD-JWT tokens
+  * Choose selectively disclosable payload fields (SD fields)
+  * Create digests for SD fields and insert into JWT body payload
+  * Create and append encoded disclosure strings for SD fields to JWT token
+* **Present** SD-JWT tokens 
+  * Selection of fields to be disclosed
+  * Support for appending optional holder binding
+* Full support for **nested SD fields** and **recursive disclosures**
+* **Parse** SD-JWT tokens and restore original payload with disclosed fields
+* **Verify** SD-JWT token 
+  * Signature verification
+  * Hash comparison and tamper check of the appended disclosures
+* Support for **multiple development platforms**: JVM, JavaScript, Native
+* Support for **integration** with various crypto libraries and frameworks, to perform the cryptographic operations and key management
 
 
 ## Example
