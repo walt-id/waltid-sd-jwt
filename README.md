@@ -99,9 +99,13 @@ This example creates and signs an SD-JWT, using the SimpleJWTCryptoProvider impl
 
 In this example we sign the JWT with the HS256 algorithm, and a UUID as a shared secret.
 
+Here we generate the SD payload, by comparing the full payload and the undisclosed payload (with selective fields removed).
+
+Alternatively, we can create the SD payload by specifying the SDMap, which indicates the selective disclosure for each field. 
+This approach also allows more fine-grained control, particularly in regard to recursive disclosures and nested payload fields.
 
 ```kotlin
-// Generate shared secret for HMAC crypto algorithm
+// Shared secret for HMAC crypto algorithm
 val sharedSecret = "ef23f749-7238-481a-815c-f0c2157dfa8e"
 
 fun main() {
@@ -122,7 +126,7 @@ fun main() {
 
   // Create SD payload by comparing original claims set with undisclosed claims set
   val sdPayload = SDPayload.createSDPayload(originalClaimsSet, undisclosedClaimsSet)
-
+   
   // Create and sign SD-JWT using the generated SD payload and the previously configured crypto provider
   val sdJwt = SDJwt.sign(sdPayload, cryptoProvider)
   // Print SD-JWT
@@ -199,7 +203,7 @@ or in two steps using the `SDJwt.parse()` method followed by the member method `
 
 The output below shows the restored JWT body payloads, with the selectively disclosable field `sub` disclosed or undisclosed.
 ```kotlin
-// Generate shared secret for HMAC crypto algorithm
+// Shared secret for HMAC crypto algorithm
 private val sharedSecret = "ef23f749-7238-481a-815c-f0c2157dfa8e"
 
 fun parseAndVerify() {
