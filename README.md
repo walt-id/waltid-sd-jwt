@@ -42,8 +42,11 @@ This libary implements the **Selective Disclosure JWT (SD-JWT)** specification: 
 * **Verify** SD-JWT token 
   * Signature verification
   * Hash comparison and tamper check of the appended disclosures
-* Support for **multiple development platforms**: JVM, JavaScript, Native
 * Support for **integration** with various crypto libraries and frameworks, to perform the cryptographic operations and key management
+* **Multiplatform support**: 
+  * Java/JVM
+  * JavaScript
+  * Native
 
 
 ## Example
