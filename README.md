@@ -16,9 +16,9 @@
 
 TODO: Add links to example code
 
-* [Sign SD-JWT tokens](#create-and-sign-an-sd-jwt-using-the-nimbus-jwt-crypto-provider)
+* [Sign SD-JWT tokens](#create-and-sign-an-sd-jwt-using-the-nimbusds-based-jwt-crypto-provider)
 * [Present SD-JWT tokens with selection of disclosed and undisclosed payload fields](#present-an-sd-jwt)
-* [Parse and verify SD-JWT tokens, resolving original payload with disclosed fields](#parse-and-verify-an-sd-jwt-using-the-nimbus-jwt-crypto-provider)
+* [Parse and verify SD-JWT tokens, resolving original payload with disclosed fields](#parse-and-verify-an-sd-jwt-using-the-nimbusds-based-jwt-crypto-provider)
 * [Integrate with your choice of framework or library, on your platform, for cryptography and key management](#integrate-with-custom-jwt-crypto-provider)
 * Multiplatform support: Java/JVM, JavaScript, Native 
 * [Usage with Maven or Gradle (JVM)](#usage-with-maven-or-gradle-jvm)
@@ -96,7 +96,7 @@ dependencies {
 ## Examples
 ### Kotlin / JVM
 
-#### Create and sign an SD-JWT using the Nimbus JWT crypto provider
+#### Create and sign an SD-JWT using the NimbusDS-based JWT crypto provider
 
 This example creates and signs an SD-JWT, using the SimpleJWTCryptoProvider implementation, that's shipped with the waltid-sd-jwt library, which uses the `nimbus-jose-jwt` library for cryptographic operations. 
 
@@ -138,7 +138,7 @@ _Example output_
 
 #### Present an SD-JWT
 
-#### Parse and verify an SD-JWT using the Nimbus JWT crypto provider
+#### Parse and verify an SD-JWT using the NimbusDS-based JWT crypto provider
 
 #### Integrate with custom JWT crypto provider
 
