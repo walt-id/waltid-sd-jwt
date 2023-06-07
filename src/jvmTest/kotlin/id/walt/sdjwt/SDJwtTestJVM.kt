@@ -17,7 +17,7 @@ class SDJwtTestJVM {
   @Test
   fun testSignJwt() {
     // Generate shared secret for HMAC crypto algorithm
-    val sharedSecret =  korlibs.crypto.SecureRandom.nextBytes(32)
+    val sharedSecret =  "ef23f749-7238-481a-815c-f0c2157dfa8e"
 
     // Create SimpleJWTCryptoProvider with MACSigner and MACVerifier
     val cryptoProvider = SimpleJWTCryptoProvider(JWSAlgorithm.HS256, MACSigner(sharedSecret), MACVerifier(sharedSecret))

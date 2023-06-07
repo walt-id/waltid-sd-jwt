@@ -100,13 +100,14 @@ dependencies {
 
 This example creates and signs an SD-JWT, using the SimpleJWTCryptoProvider implementation, that's shipped with the waltid-sd-jwt library, which uses the `nimbus-jose-jwt` library for cryptographic operations. 
 
-In this example we sign the JWT with the HS256 algorithm, and a shared secret, which we randomly generate.
+In this example we sign the JWT with the HS256 algorithm, and a UUID as a shared secret.
 
 
 ```kotlin
+// Generate shared secret for HMAC crypto algorithm
+val sharedSecret = "ef23f749-7238-481a-815c-f0c2157dfa8e"
+
 fun main() {
-  // Generate shared secret for HMAC crypto algorithm
-  val sharedSecret =  korlibs.crypto.SecureRandom.nextBytes(32)
 
   // Create SimpleJWTCryptoProvider with MACSigner and MACVerifier
   val cryptoProvider = SimpleJWTCryptoProvider(JWSAlgorithm.HS256, MACSigner(sharedSecret), MACVerifier(sharedSecret))
@@ -129,12 +130,12 @@ fun main() {
   val sdJwt = SDJwt.sign(sdPayload, cryptoProvider)
   // Print SD-JWT
   println(sdJwt)
-    }
+}
 ```
 
 _Example output_
 
-`eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsidWtxWFprV0VlcHRqYUN0eElnTEwtZDRuNUZidVNKQmY3TE9DVDF2TDY1TSJdfQ.NZ4iM0sksMg2BcxbyQEZEaWqM4tz00oJ3z_9aJMF7rM~WyJ2SWVrdjhHbGtfYmpsUjVLV1RCYndnIiwic3ViIiwiMTIzIl0`
+`eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~WyJ4RFk5VjBtOG43am82ZURIUGtNZ1J3Iiwic3ViIiwiMTIzIl0`
 
 #### Present an SD-JWT
 
