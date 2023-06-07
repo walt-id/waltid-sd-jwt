@@ -21,7 +21,7 @@ TODO: Add links to example code
 * Parse and verify SD-JWT tokens, resolving original payload with disclosed fields
 * Integrate with your choice of framework or library, on your platform, for cryptography and key management
 * Multiplatform support: Java/JVM, JavaScript, Native 
-* [Usage with Java or Kotlin on JVM](#usage-with-java--kotlin-and-jvm)
+* [Usage with Maven or Gradle (JVM)](#usage-with-maven-or-gradle-jvm)
 
 ### Further information
 
@@ -51,7 +51,7 @@ This libary implements the **Selective Disclosure JWT (SD-JWT)** specification: 
   * JavaScript
   * Native
 
-## Usage with Java / Kotlin and JVM
+## Usage with Maven or Gradle (JVM)
 
 **Maven / Gradle repository**:
 
