@@ -5,5 +5,5 @@ pluginManagement {
     }
     
 }
-rootProject.name = "sd-jwt"
+rootProject.name = "waltid-sd-jwt"
 
