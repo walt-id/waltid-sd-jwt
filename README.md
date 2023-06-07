@@ -248,6 +248,11 @@ To integrate with your custom JWT crypto provider, on your platform, you need to
 In this example, you see how I made use of this interface to implement the JWT crypto provider based on the NimbusDS Jose/JWT library for JVM:
 
 ```kotlin
+import com.nimbusds.jose.*
+import com.nimbusds.jwt.JWTClaimsSet
+import com.nimbusds.jwt.SignedJWT
+import kotlinx.serialization.json.JsonObject
+
 class SimpleJWTCryptoProvider(
   val jwsAlgorithm: JWSAlgorithm,
   private val jwsSigner: JWSSigner?,
