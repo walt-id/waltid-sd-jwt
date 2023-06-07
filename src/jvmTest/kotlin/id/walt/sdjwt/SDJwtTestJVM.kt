@@ -16,19 +16,29 @@ import kotlin.test.Test
 class SDJwtTestJVM {
   @Test
   fun testSignJwt() {
+    // Generate shared secret for HMAC crypto algorithm
+    val sharedSecret =  korlibs.crypto.SecureRandom.nextBytes(32)
+
+    // Create SimpleJWTCryptoProvider with MACSigner and MACVerifier
+    val cryptoProvider = SimpleJWTCryptoProvider(JWSAlgorithm.HS256, MACSigner(sharedSecret), MACVerifier(sharedSecret))
+
+    // Create original JWT claims set, using nimbusds claims set builder
     val originalClaimsSet = JWTClaimsSet.Builder()
       .subject("123")
       .audience("456")
     .build()
-    val sdPayload = SDPayload.createSDPayload(
-      originalClaimsSet,
-      JWTClaimsSet.Builder(originalClaimsSet)
-        .subject(null)
-      .build())
 
-    val sharedSecret =  korlibs.crypto.SecureRandom.nextBytes(32)
-    val cryptoProvider = SimpleJWTCryptoProvider(JWSAlgorithm.HS256, MACSigner(sharedSecret), MACVerifier(sharedSecret))
+    // Create undisclosed claims set, by removing e.g. subject property from original claims set
+    val undisclosedClaimsSet = JWTClaimsSet.Builder(originalClaimsSet)
+      .subject(null)
+      .build()
+
+    // Create SD payload by comparing original claims set with undisclosed claims set
+    val sdPayload = SDPayload.createSDPayload(originalClaimsSet, undisclosedClaimsSet)
+
+    // Create and sign SD-JWT using the generated SD payload and the previously configured crypto provider
     val sdJwt = SDJwt.sign(sdPayload, cryptoProvider)
+    // Print SD-JWT
     println(sdJwt)
 
     sdJwt.sdPayload.undisclosedPayload shouldNotContainKey "sub"

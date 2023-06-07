@@ -16,10 +16,10 @@
 
 TODO: Add links to example code
 
-* Sign SD-JWT tokens
-* Present SD-JWT tokens with selection of disclosed and undisclosed payload fields
-* Parse and verify SD-JWT tokens, resolving original payload with disclosed fields
-* Integrate with your choice of framework or library, on your platform, for cryptography and key management
+* [Sign SD-JWT tokens](#create-and-sign-an-sd-jwt-using-the-nimbus-jwt-crypto-provider)
+* [Present SD-JWT tokens with selection of disclosed and undisclosed payload fields](#present-an-sd-jwt)
+* [Parse and verify SD-JWT tokens, resolving original payload with disclosed fields](#parse-and-verify-an-sd-jwt-using-the-nimbus-jwt-crypto-provider)
+* [Integrate with your choice of framework or library, on your platform, for cryptography and key management](#integrate-with-custom-jwt-crypto-provider)
 * Multiplatform support: Java/JVM, JavaScript, Native 
 * [Usage with Maven or Gradle (JVM)](#usage-with-maven-or-gradle-jvm)
 
@@ -37,6 +37,7 @@ This libary implements the **Selective Disclosure JWT (SD-JWT)** specification: 
   * Choose selectively disclosable payload fields (SD fields)
   * Create digests for SD fields and insert into JWT body payload
   * Create and append encoded disclosure strings for SD fields to JWT token
+  * Add random or fixed number of **decoy digests** on each nested object property
 * **Present** SD-JWT tokens 
   * Selection of fields to be disclosed
   * Support for appending optional holder binding
@@ -92,15 +93,56 @@ dependencies {
 }
 ```
 
-## Example
-TODO: Desribe code examples
+## Examples
+### Kotlin / JVM
+
+#### Create and sign an SD-JWT using the Nimbus JWT crypto provider
+
+This example creates and signs an SD-JWT, using the SimpleJWTCryptoProvider implementation, that's shipped with the waltid-sd-jwt library, which uses the `nimbus-jose-jwt` library for cryptographic operations. 
+
+In this example we sign the JWT with the HS256 algorithm, and a shared secret, which we randomly generate.
+
 
 ```kotlin
 fun main() {
-    
+  // Generate shared secret for HMAC crypto algorithm
+  val sharedSecret =  korlibs.crypto.SecureRandom.nextBytes(32)
 
+  // Create SimpleJWTCryptoProvider with MACSigner and MACVerifier
+  val cryptoProvider = SimpleJWTCryptoProvider(JWSAlgorithm.HS256, MACSigner(sharedSecret), MACVerifier(sharedSecret))
+
+  // Create original JWT claims set, using nimbusds claims set builder
+  val originalClaimsSet = JWTClaimsSet.Builder()
+    .subject("123")
+    .audience("456")
+    .build()
+
+  // Create undisclosed claims set, by removing e.g. subject property from original claims set
+  val undisclosedClaimsSet = JWTClaimsSet.Builder(originalClaimsSet)
+    .subject(null)
+    .build()
+
+  // Create SD payload by comparing original claims set with undisclosed claims set
+  val sdPayload = SDPayload.createSDPayload(originalClaimsSet, undisclosedClaimsSet)
+
+  // Create and sign SD-JWT using the generated SD payload and the previously configured crypto provider
+  val sdJwt = SDJwt.sign(sdPayload, cryptoProvider)
+  // Print SD-JWT
+  println(sdJwt)
     }
 ```
+
+_Example output_
+
+`eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsidWtxWFprV0VlcHRqYUN0eElnTEwtZDRuNUZidVNKQmY3TE9DVDF2TDY1TSJdfQ.NZ4iM0sksMg2BcxbyQEZEaWqM4tz00oJ3z_9aJMF7rM~WyJ2SWVrdjhHbGtfYmpsUjVLV1RCYndnIiwic3ViIiwiMTIzIl0`
+
+#### Present an SD-JWT
+
+#### Parse and verify an SD-JWT using the Nimbus JWT crypto provider
+
+#### Integrate with custom JWT crypto provider
+
+
 
 
 ## Join the community
