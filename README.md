@@ -53,9 +53,22 @@ This libary implements the **Selective Disclosure JWT (SD-JWT)** specification: 
 
 ## Usage with Java / Kotlin and JVM
 
+**Maven / Gradle repository**:
+
+`https://maven.walt.id/repository/waltid-ssi-kit/`
+
 **Maven**
 
 ```xml
+[...]
+<repositories>
+  <repository>
+    <id>waltid-ssikit</id>
+    <name>waltid-ssikit</name>
+    <url>https://maven.walt.id/repository/waltid-ssi-kit/</url>
+  </repository>
+</repositories>
+[...]
 <dependency>
     <groupId>id.walt</groupId>
     <artifactId>waltid-sd-jwt-jvm</artifactId>
@@ -67,6 +80,11 @@ This libary implements the **Selective Disclosure JWT (SD-JWT)** specification: 
 
 _Kotlin DSL_
 ```kotlin
+[...]
+repositories {
+  maven("https://maven.walt.id/repository/waltid-ssi-kit/")
+}
+[...]
 val sdJwtVersion = "1.2306071235.0"
 [...]
 dependencies {
