@@ -5,7 +5,7 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import kotlinx.serialization.json.JsonObject
 
-actual class SimpleJWTCryptoProvider(
+class SimpleJWTCryptoProvider(
   val jwsAlgorithm: JWSAlgorithm,
   private val jwsSigner: JWSSigner?,
   private val jwsVerifier: JWSVerifier?

@@ -8,17 +8,17 @@ import kotlinx.serialization.json.JsonObject
  * Default implementations exist for some platforms.
  * @see SimpleJWTCryptoProvider
  */
-interface JWTCryptoProvider {
+interface AsyncJWTCryptoProvider {
   /**
    * Interface method to create a signed JWT for the given JSON payload object, with an optional keyID.
    * @param payload The JSON payload of the JWT to be signed
    * @param keyID Optional keyID of the signing key to be used, if required by crypto provider
    */
-  fun sign(payload: JsonObject, keyID: String? = null): String
+  suspend fun sign(payload: JsonObject, keyID: String? = null): String
 
   /**
    * Interface method for verifying a JWT signature
    * @param jwt A signed JWT token to be verified
    */
-  fun verify(jwt: String): Boolean
+  suspend fun verify(jwt: String): Boolean
 }

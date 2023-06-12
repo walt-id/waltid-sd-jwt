@@ -46,6 +46,7 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
                 implementation("com.soywiz.korlibs.krypto:krypto:$kryptoVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
             }
         }
         val commonTest by getting {
@@ -70,8 +71,14 @@ kotlin {
                 implementation("io.kotest:kotest-assertions-json:5.5.5")
             }
         }
-        val jsMain by getting
-        val jsTest by getting
+        val jsMain by getting {
+            dependencies {
+                implementation(npm("jose", "~4.14.4"))
+            }
+        }
+        val jsTest by getting {
+
+        }
         val nativeMain by getting
         val nativeTest by getting
     }

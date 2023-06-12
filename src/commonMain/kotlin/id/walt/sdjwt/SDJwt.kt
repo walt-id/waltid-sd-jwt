@@ -85,6 +85,14 @@ class SDJwt (
     return sdPayload.verifyDisclosures() && jwtCryptoProvider.verify(jwt)
   }
 
+  /**
+   * Verify the SD-JWT by checking the signature, using the given JWT crypto provider, and matching the disclosures against the digests in the JWT payload
+   * @param jwtCryptoProvider JWT crypto provider, that implements standard JWT token verification on the target platform
+   */
+  suspend fun verifyAsync(jwtCryptoProvider: AsyncJWTCryptoProvider): Boolean {
+    return sdPayload.verifyDisclosures() && jwtCryptoProvider.verify(jwt)
+  }
+
   companion object {
     const val DIGESTS_KEY = "_sd"
     const val SEPARATOR = '~'
@@ -122,6 +130,29 @@ class SDJwt (
     }
 
     /**
+     * Parse SD-JWT from a token string and verify it
+     * @return parsed SD-JWT, if token has been verified
+     * @throws Exception if SD-JWT cannot be verified
+     */
+    suspend fun verifyAndParseAsync(sdJwt: String, jwtCryptoProvider: AsyncJWTCryptoProvider): SDJwt {
+      return parse(sdJwt).also {
+        if(!it.verifyAsync(jwtCryptoProvider)) {
+          throw Exception("SD-JWT could not be verified")
+        }
+      }
+    }
+
+    private fun createFromSignedJwt(signedJwt: String, sdPayload: SDPayload, withHolderJwt: String? = null): SDJwt {
+      val sdJwt = parse(signedJwt)
+      return SDJwt(
+        jwt = sdJwt.jwt,
+        header = sdJwt.header,
+        sdPayload = sdPayload,
+        holderJwt = withHolderJwt
+      )
+    }
+
+    /**
      * Sign the given payload as SD-JWT token, using the given JWT crypto provider, optionally with the specified key ID and holder binding
      * @param sdPayload Payload with selective disclosures to be signed
      * @param jwtCryptoProvider Crypto provider implementation, that supports JWT creation on the target platform
@@ -129,15 +160,23 @@ class SDJwt (
      * @param withHolderJwt Optionally, append the given holder binding JWT to the signed SD-JWT token
      * @return  The signed SDJwt object
      */
-    fun sign(sdPayload: SDPayload, jwtCryptoProvider: JWTCryptoProvider, keyID: String? = null, withHolderJwt: String? = null): SDJwt {
-      val sdJwt = parse(jwtCryptoProvider.sign(sdPayload.undisclosedPayload, keyID))
-     return SDJwt(
-        jwt = sdJwt.jwt,
-        header = sdJwt.header,
-        sdPayload = sdPayload,
-        holderJwt = withHolderJwt
-     )
-    }
+    fun sign(sdPayload: SDPayload, jwtCryptoProvider: JWTCryptoProvider, keyID: String? = null, withHolderJwt: String? = null): SDJwt
+      = createFromSignedJwt(
+        jwtCryptoProvider.sign(sdPayload.undisclosedPayload, keyID), sdPayload, withHolderJwt
+      )
+
+    /**
+     * Sign the given payload as SD-JWT token, using the given JWT crypto provider, optionally with the specified key ID and holder binding
+     * @param sdPayload Payload with selective disclosures to be signed
+     * @param jwtCryptoProvider Crypto provider implementation, that supports JWT creation on the target platform
+     * @param keyID Optional key ID, if the crypto provider implementation requires it
+     * @param withHolderJwt Optionally, append the given holder binding JWT to the signed SD-JWT token
+     * @return  The signed SDJwt object
+     */
+    suspend fun signAsync(sdPayload: SDPayload, jwtCryptoProvider: AsyncJWTCryptoProvider, keyID: String? = null, withHolderJwt: String? = null): SDJwt
+      = createFromSignedJwt(
+        jwtCryptoProvider.sign(sdPayload.undisclosedPayload, keyID), sdPayload, withHolderJwt
+      )
 
     /**
      * Check the given string, whether it matches the pattern of an SD-JWT
