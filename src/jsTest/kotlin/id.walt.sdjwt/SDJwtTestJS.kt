@@ -1,14 +1,13 @@
 package id.walt.sdjwt
 
 import io.kotest.assertions.json.shouldMatchJson
-import io.kotest.common.runPromise
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.maps.shouldNotContainKey
 import io.kotest.matchers.shouldBe
-import kotlinx.browser.document
-import kotlinx.browser.window
-import kotlinx.coroutines.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.promise
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
@@ -50,5 +49,9 @@ class SDJwtTestJS {
     sdJwt.disclosures shouldHaveSize 1
     sdJwt.sdPayload.digestedDisclosures[sdJwt.sdPayload.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray[0].jsonPrimitive.content]!!.key shouldBe "sub"
     sdJwt.sdPayload.fullPayload.toString() shouldMatchJson originalClaimsSet.toString()
+
+    sdJwt.verifyAsync(cryptoProvider) shouldBe true
+    SDJwt("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiI0NTciLCJfc2QiOlsibTcyQ0tyVHhYckhlWUJSQTFBVFQ1S0t4NGdFWExlOVhqVFROakdRWkVQNCJdfQ.Tltz2SGxmdIpD_ny1XSTn89rQSmYsl9EcsXxsfJE0wo", buildJsonObject {  }, sdJwt.sdPayload)
+      .verifyAsync(cryptoProvider) shouldBe false
   }
 }

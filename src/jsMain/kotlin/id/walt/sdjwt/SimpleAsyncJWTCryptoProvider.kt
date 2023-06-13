@@ -17,20 +17,30 @@ open class SimpleAsyncJWTCryptoProvider(
   private val options: dynamic
 ) : AsyncJWTCryptoProvider {
   override suspend fun sign(payload: JsonObject, keyID: String?): String = suspendCoroutine { continuation ->
-    kotlin.js.console.log("SIGNING", payload.toString())
+    console.log("SIGNING", payload.toString())
     jose.SignJWT(JSON.parse(payload.toString())).setProtectedHeader(buildJsonObject {
       put("alg", algorithm)
       put("typ", "JWT")
       keyID?.also { put("kid", it) }
     }.let { JSON.parse(it.toString()) }).sign(keyParam, options).then({
-      kotlin.js.console.log("SIGNED")
+      console.log("SIGNED")
       continuation.resume(it)
     }, {
-      kotlin.js.console.log("ERROR SIGNING", it.message)
+      console.log("ERROR SIGNING", it.message)
     })
   }
 
-  override suspend fun verify(jwt: String): Boolean {
-    TODO("Not yet implemented")
+  override suspend fun verify(jwt: String): Boolean = suspendCoroutine { continuation ->
+    console.log("Verifying JWT: $jwt")
+    jose.jwtVerify(jwt, keyParam, options ?: js("{}")).then (
+      {
+        console.log("Verified.")
+        continuation.resume(true)
+      },
+      {
+        console.log("Verification failed: ${it.message}")
+        continuation.resume(false)
+      }
+    )
   }
 }

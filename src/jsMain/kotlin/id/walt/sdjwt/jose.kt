@@ -20,4 +20,21 @@ external object jose {
 
     fun sign(key: dynamic, options: dynamic): Promise<String>
   }
+
+  class JWTPayload {
+    val sub: String
+    val aud: String
+    val exp: Number
+    val iat: Number
+    val iss: String
+    val nbf: Number
+    val jti: String
+  }
+
+  class JWTVerifyResult {
+    val payload: JWTPayload
+    val protectedHeader: dynamic
+  }
+
+  fun jwtVerify(jwt: String, key: dynamic, options: dynamic): Promise<JWTVerifyResult>
 }
