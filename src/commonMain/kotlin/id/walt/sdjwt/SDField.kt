@@ -2,6 +2,8 @@ package id.walt.sdjwt
 
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 
 /**
  * Selective disclosure information for a given payload field
@@ -9,6 +11,8 @@ import kotlinx.serialization.json.jsonObject
  * @param children    Not null, if field is an object. Contains SDMap for the properties of the object
  * @see SDMap
  */
+@ExperimentalJsExport
+@JsExport
 data class SDField(
   val sd: Boolean,
   val children: SDMap? = null

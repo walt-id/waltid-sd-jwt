@@ -2,11 +2,16 @@ package id.walt.sdjwt
 
 import korlibs.crypto.encoding.Base64
 import kotlinx.serialization.json.*
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+import kotlin.js.JsName
 
 /**
  * SD-JWT object, providing signed JWT token, header and payload with disclosures, as well as optional holder binding
  */
-class SDJwt (
+@ExperimentalJsExport
+@JsExport
+open class SDJwt (
   val jwt: String,
   val header: JsonObject,
   val sdPayload: SDPayload,
@@ -39,6 +44,7 @@ class SDJwt (
 
   override fun toString() = toString(isPresentation)
 
+  @JsName("toFormattedString")
   fun toString(formatForPresentation: Boolean): String {
     return listOf(jwt)
       .plus(disclosures)
@@ -51,6 +57,7 @@ class SDJwt (
    * @param sdMap Selective disclosure map, indicating for each field (recursively) whether it should be disclosed or undisclosed in the presentation
    * @param withHolderJwt Optionally, adds the provided JWT as holder binding to the presented SD-JWT token
    */
+  @JsName("present")
   fun present(sdMap: SDMap?, withHolderJwt: String? = null): SDJwt {
     return SDJwt(
       jwt,
@@ -64,6 +71,7 @@ class SDJwt (
    * @param discloseAll true: disclose all selective disclosures, false: all selective disclosures remain undisclosed
    * @param withHolderJwt Optionally, adds the provided JWT as holder binding to the presented SD-JWT token
    */
+  @JsName("presentAll")
   fun present(discloseAll: Boolean, withHolderJwt: String? = null): SDJwt {
     return SDJwt(
       jwt,
@@ -89,6 +97,7 @@ class SDJwt (
    * Verify the SD-JWT by checking the signature, using the given JWT crypto provider, and matching the disclosures against the digests in the JWT payload
    * @param jwtCryptoProvider JWT crypto provider, that implements standard JWT token verification on the target platform
    */
+  @JsExport.Ignore
   suspend fun verifyAsync(jwtCryptoProvider: AsyncJWTCryptoProvider): Boolean {
     return sdPayload.verifyDisclosures() && jwtCryptoProvider.verify(jwt)
   }
@@ -134,6 +143,7 @@ class SDJwt (
      * @return parsed SD-JWT, if token has been verified
      * @throws Exception if SD-JWT cannot be verified
      */
+    @JsExport.Ignore
     suspend fun verifyAndParseAsync(sdJwt: String, jwtCryptoProvider: AsyncJWTCryptoProvider): SDJwt {
       return parse(sdJwt).also {
         if(!it.verifyAsync(jwtCryptoProvider)) {
@@ -173,6 +183,7 @@ class SDJwt (
      * @param withHolderJwt Optionally, append the given holder binding JWT to the signed SD-JWT token
      * @return  The signed SDJwt object
      */
+    @JsExport.Ignore
     suspend fun signAsync(sdPayload: SDPayload, jwtCryptoProvider: AsyncJWTCryptoProvider, keyID: String? = null, withHolderJwt: String? = null): SDJwt
       = createFromSignedJwt(
         jwtCryptoProvider.sign(sdPayload.undisclosedPayload, keyID), sdPayload, withHolderJwt

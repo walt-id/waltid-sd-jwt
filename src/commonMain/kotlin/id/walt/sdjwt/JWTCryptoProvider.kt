@@ -1,6 +1,8 @@
 package id.walt.sdjwt
 
 import kotlinx.serialization.json.JsonObject
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 
 /**
  * Crypto provider, that provides signing and verifying of standard JWTs on the target platform
@@ -8,6 +10,8 @@ import kotlinx.serialization.json.JsonObject
  * Default implementations exist for some platforms.
  * @see SimpleJWTCryptoProvider
  */
+@ExperimentalJsExport
+@JsExport
 interface JWTCryptoProvider {
   /**
    * Interface method to create a signed JWT for the given JSON payload object, with an optional keyID.
