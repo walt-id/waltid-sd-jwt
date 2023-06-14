@@ -23,11 +23,13 @@ class SimpleJWTCryptoProvider(
     }.serialize()
   }
 
-  override fun verify(jwt: String): Boolean {
+  override fun verify(jwt: String): JwtVerificationResult {
     if(jwsVerifier == null) {
       throw Exception("No verifier available")
     }
-    return SignedJWT.parse(jwt).verify(jwsVerifier)
+    return JwtVerificationResult(
+      SignedJWT.parse(jwt).verify(jwsVerifier)
+    )
   }
 }
 

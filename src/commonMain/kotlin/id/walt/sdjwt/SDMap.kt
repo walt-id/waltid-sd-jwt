@@ -1,9 +1,6 @@
 package id.walt.sdjwt
 
 import kotlinx.serialization.json.*
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
-import kotlin.js.JsName
 
 /**
  * Selective disclosure map, that describes for each payload field recursively, whether it should be selectively disclosable / selected for disclosure.
@@ -11,9 +8,7 @@ import kotlin.js.JsName
  * @param decoyMode **For SD-JWT issuance:** Generate decoy digests for this hierarchical level randomly or fixed, set to NONE for parsed SD-JWTs, **for presentation:** _unused_
  * @param decoys  **For SD-JWT issuance:** Num (fixed mode) or max num (random mode) of decoy digests to add for this hierarchical level. 0 if NONE, **for presentation:** _unused_
  */
-@ExperimentalJsExport
-@JsExport
-class SDMap(
+class SDMap internal constructor(
   val fields: Map<String, SDField>,
   val decoyMode: DecoyMode = DecoyMode.NONE,
   val decoys: Int = 0
@@ -45,6 +40,18 @@ class SDMap(
     }.joinToString("\n")
   }
 
+  fun toJSON(): JsonObject {
+    return buildJsonObject {
+      put("fields", buildJsonObject {
+        fields.forEach { entry ->
+          put(entry.key, entry.value.toJSON())
+        }
+      })
+      put("decoyMode", decoyMode.name)
+      put("decoys", decoys)
+    }
+  }
+
   companion object {
 
     /**
@@ -63,7 +70,7 @@ class SDMap(
         } else {
           SDField(false)
         }
-      }.let { it.toSDMap(decoyMode, decoys) }
+      }.toSDMap(decoyMode, decoys)
     }
 
     /**
@@ -72,7 +79,6 @@ class SDMap(
      * @param decoyMode **For SD-JWT issuance:** Generate decoy digests for this hierarchical level randomly or fixed, set to NONE for parsed SD-JWTs, **for presentation:** _unused_
      * @param decoys  **For SD-JWT issuance:** Num (fixed mode) or max num (random mode) of decoy digests to add for this hierarchical level. 0 if NONE, **for presentation:** _unused_.
      */
-    @JsName("generateSDMapFromJsonPaths")
     fun generateSDMap(jsonPaths: Collection<String>, decoyMode: DecoyMode = DecoyMode.NONE, decoys: Int = 0): SDMap {
       val pathMap = jsonPaths.map { path -> Pair(path.substringBefore("."), path.substringAfter(".", "")) }
         .groupBy({ p -> p.first }, { p -> p.second }).mapValues { entry -> entry.value.filterNot { it.isEmpty() } }
@@ -96,7 +102,7 @@ class SDMap(
      * @param undisclosedPayload  Undisclosed payload as contained in the JWT body of the SD-JWT token.
      * @param digestedDisclosures Map of digests to disclosures appended to the JWT in the SD-JWT token
      */
-    fun regenerateSDMap(undisclosedPayload: JsonObject, digestedDisclosures: Map<String, SDisclosure>): SDMap {
+    internal fun regenerateSDMap(undisclosedPayload: JsonObject, digestedDisclosures: Map<String, SDisclosure>): SDMap {
       return (undisclosedPayload[SDJwt.DIGESTS_KEY]?.jsonArray?.filter { digestedDisclosures.containsKey(it.jsonPrimitive.content) }?.map {
         sdEntry -> digestedDisclosures[sdEntry.jsonPrimitive.content]!!
       }?.associateBy({it.key}, { regenerateSDField(true, it.value, digestedDisclosures) }) ?: mapOf())
@@ -105,6 +111,21 @@ class SDMap(
             regenerateSDField(false, it.value, digestedDisclosures)
           }
         ).toSDMap()
+    }
+
+    fun fromJSON(json: JsonObject): SDMap {
+      println("Parsing SDMap from: $json")
+      return SDMap(
+        fields = json["fields"]?.jsonObject?.entries?.associate { entry ->
+          Pair(entry.key, SDField.fromJSON(entry.value))
+        } ?: mapOf(),
+        decoyMode = json["decoyMode"]?.let { DecoyMode.fromJSON(it) } ?: DecoyMode.NONE,
+        decoys = json["decoys"]?.jsonPrimitive?.int ?: 0
+      )
+    }
+
+    fun fromJSON(json: String): SDMap {
+      return fromJSON(Json.parseToJsonElement(json).jsonObject)
     }
   }
 

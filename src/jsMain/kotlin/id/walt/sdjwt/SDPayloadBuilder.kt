@@ -14,10 +14,10 @@ class SDPayloadBuilder(
       Json.parseToJsonElement(JSON.stringify(undisclosedSDPayload)).jsonObject)
   }
 
-  fun buildForSDMap(sdMap: SDMap): SDPayload {
+  fun buildForSDMap(sdMap: dynamic): SDPayload {
     return SDPayload.createSDPayload(
       Json.parseToJsonElement(JSON.stringify(fullPayload)).jsonObject,
-      sdMap
+      SDMap.Companion.fromJSON(JSON.stringify(sdMap))
     )
   }
 }

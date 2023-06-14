@@ -11,18 +11,36 @@ import kotlin.js.JsName
  */
 @ExperimentalJsExport
 @JsExport
-open class SDJwt (
+open class SDJwt internal constructor (
   val jwt: String,
-  val header: JsonObject,
-  val sdPayload: SDPayload,
+  protected val header: JsonObject,
+  protected val sdPayload: SDPayload,
   val holderJwt: String? = null,
-  val isPresentation: Boolean = false
+  protected val isPresentation: Boolean = false
 ) {
+  internal constructor(sdJwt: SDJwt) : this(sdJwt.jwt, sdJwt.header, sdJwt.sdPayload, sdJwt.holderJwt, sdJwt.isPresentation)
   /**
    * Encoded disclosures, included in this SD-JWT
    */
+  @JsName("zzz_unused_disclosures") // redefined in SDJwtJS
   val disclosures
     get() = sdPayload.sDisclosures.map { it.disclosure }.toSet()
+
+  @JsName("zzz_unused_disclosureObjects") // redefined in SDJwtJS
+  val disclosureObjects
+    get() = sdPayload.sDisclosures
+
+  @JsName("zzz_unused_undisclosedPayload") // redefined in SDJwtJS
+  val undisclosedPayload
+    get() = sdPayload.undisclosedPayload
+
+  @JsName("zzz_unused_fullPayload") // redefined in SDJwtJS
+  val fullPayload
+    get() = sdPayload.fullPayload
+
+  @JsName("zzz_unused_digestedDisclosures")
+  val digestedDisclosures
+    get() = sdPayload.digestedDisclosures
 
   /**
    * Signature algorithm from JWT header
@@ -45,7 +63,7 @@ open class SDJwt (
   override fun toString() = toString(isPresentation)
 
   @JsName("toFormattedString")
-  fun toString(formatForPresentation: Boolean): String {
+  open fun toString(formatForPresentation: Boolean): String {
     return listOf(jwt)
       .plus(disclosures)
       .plus(holderJwt?.let { listOf(it) } ?: (if(formatForPresentation) listOf("") else listOf()))
@@ -89,8 +107,15 @@ open class SDJwt (
    * Verify the SD-JWT by checking the signature, using the given JWT crypto provider, and matching the disclosures against the digests in the JWT payload
    * @param jwtCryptoProvider JWT crypto provider, that implements standard JWT token verification on the target platform
    */
-  fun verify(jwtCryptoProvider: JWTCryptoProvider): Boolean {
-    return sdPayload.verifyDisclosures() && jwtCryptoProvider.verify(jwt)
+  fun verify(jwtCryptoProvider: JWTCryptoProvider): VerificationResult<SDJwt> {
+    return jwtCryptoProvider.verify(jwt).let {
+      VerificationResult(
+        sdJwt = this,
+        signatureVerified = it.verified,
+        disclosuresVerified = sdPayload.verifyDisclosures(),
+        message = it.message
+      )
+    }
   }
 
   /**
@@ -98,8 +123,15 @@ open class SDJwt (
    * @param jwtCryptoProvider JWT crypto provider, that implements standard JWT token verification on the target platform
    */
   @JsExport.Ignore
-  suspend fun verifyAsync(jwtCryptoProvider: AsyncJWTCryptoProvider): Boolean {
-    return sdPayload.verifyDisclosures() && jwtCryptoProvider.verify(jwt)
+  suspend fun verifyAsync(jwtCryptoProvider: AsyncJWTCryptoProvider): VerificationResult<SDJwt> {
+    return jwtCryptoProvider.verify(jwt).let {
+      VerificationResult(
+        sdJwt = this,
+        signatureVerified = it.verified,
+        disclosuresVerified = sdPayload.verifyDisclosures(),
+        message = it.message
+      )
+    }
   }
 
   companion object {
@@ -128,28 +160,20 @@ open class SDJwt (
     /**
      * Parse SD-JWT from a token string and verify it
      * @return parsed SD-JWT, if token has been verified
-     * @throws Exception if SD-JWT cannot be verified
+     * @throws Exception if SD-JWT cannot be parsed
      */
-    fun verifyAndParse(sdJwt: String, jwtCryptoProvider: JWTCryptoProvider): SDJwt {
-      return parse(sdJwt).also {
-        if(!it.verify(jwtCryptoProvider)) {
-          throw Exception("SD-JWT could not be verified")
-        }
-      }
+    fun verifyAndParse(sdJwt: String, jwtCryptoProvider: JWTCryptoProvider): VerificationResult<SDJwt> {
+      return parse(sdJwt).verify(jwtCryptoProvider)
     }
 
     /**
      * Parse SD-JWT from a token string and verify it
      * @return parsed SD-JWT, if token has been verified
-     * @throws Exception if SD-JWT cannot be verified
+     * @throws Exception if SD-JWT cannot be parsed
      */
     @JsExport.Ignore
-    suspend fun verifyAndParseAsync(sdJwt: String, jwtCryptoProvider: AsyncJWTCryptoProvider): SDJwt {
-      return parse(sdJwt).also {
-        if(!it.verifyAsync(jwtCryptoProvider)) {
-          throw Exception("SD-JWT could not be verified")
-        }
-      }
+    suspend fun verifyAndParseAsync(sdJwt: String, jwtCryptoProvider: AsyncJWTCryptoProvider): VerificationResult<SDJwt> {
+      return parse(sdJwt).verifyAsync(jwtCryptoProvider)
     }
 
     private fun createFromSignedJwt(signedJwt: String, sdPayload: SDPayload, withHolderJwt: String? = null): SDJwt {

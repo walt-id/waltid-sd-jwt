@@ -8,10 +8,11 @@ import kotlin.js.JsExport
  * Crypto provider, that provides signing and verifying of standard JWTs on the target platform
  * Can be implemented by library user, to integrate their own or custom JWT crypto library
  * Default implementations exist for some platforms.
+ * **Note for JavaScript**: Implement _JSAsyncJWTCryptoProvider_ instead.
  * @see SimpleJWTCryptoProvider
  */
 @ExperimentalJsExport
-@JsExport
+@JsExport.Ignore
 interface AsyncJWTCryptoProvider {
   /**
    * Interface method to create a signed JWT for the given JSON payload object, with an optional keyID.
@@ -26,5 +27,5 @@ interface AsyncJWTCryptoProvider {
    * @param jwt A signed JWT token to be verified
    */
   @JsExport.Ignore
-  suspend fun verify(jwt: String): Boolean
+  suspend fun verify(jwt: String): JwtVerificationResult
 }

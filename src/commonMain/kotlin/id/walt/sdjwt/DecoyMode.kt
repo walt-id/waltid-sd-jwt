@@ -1,5 +1,9 @@
 package id.walt.sdjwt
 
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -14,5 +18,18 @@ import kotlin.js.JsExport
 enum class DecoyMode {
   NONE,
   FIXED,
-  RANDOM
+  RANDOM;
+
+  @JsExport.Ignore
+  companion object {
+    @JsExport.Ignore
+    fun fromJSON(json: JsonElement): DecoyMode {
+      println("Parsing DecoyMode from $json")
+      return (if(json is JsonObject) {
+        json.jsonObject["name"]?.jsonPrimitive?.content
+      } else {
+        json.jsonPrimitive.content
+      })?.let { valueOf(it) } ?: throw Exception("Error parsing DecoyMode from JSON value")
+    }
+  }
 }

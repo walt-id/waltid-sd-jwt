@@ -1,5 +1,6 @@
 package id.walt.sdjwt
 
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.promise
 import kotlinx.serialization.json.*
@@ -18,7 +19,7 @@ open class SimpleAsyncJWTCryptoProvider(
   private val algorithm: String,
   private val keyParam: dynamic,
   private val options: dynamic
-) : AsyncJWTCryptoProvider {
+) : JSAsyncJWTCryptoProvider {
   @JsExport.Ignore
   override suspend fun sign(payload: JsonObject, keyID: String?): String = suspendCoroutine { continuation ->
     console.log("SIGNING", payload.toString())
@@ -35,25 +36,27 @@ open class SimpleAsyncJWTCryptoProvider(
   }
 
   @JsExport.Ignore
-  override suspend fun verify(jwt: String): Boolean = suspendCoroutine { continuation ->
+  override suspend fun verify(jwt: String): JwtVerificationResult = suspendCoroutine { continuation ->
     console.log("Verifying JWT: $jwt")
     jose.jwtVerify(jwt, keyParam, options ?: js("{}")).then (
       {
         console.log("Verified.")
-        continuation.resume(true)
+        continuation.resume(JwtVerificationResult(true))
       },
       {
         console.log("Verification failed: ${it.message}")
-        continuation.resume(false)
+        continuation.resume(JwtVerificationResult(false, it.message))
       }
     )
   }
 
-  fun signAsync(payload: dynamic, keyID: String?): Promise<String> = GlobalScope.promise {
+  @OptIn(DelicateCoroutinesApi::class)
+  override fun signAsync(payload: dynamic, keyID: String?) = GlobalScope.promise {
     sign(Json.parseToJsonElement(JSON.stringify(payload)).jsonObject, keyID)
   }
 
-  fun verifyAsync(jwt: String): Promise<Boolean> = GlobalScope.promise {
+  @OptIn(DelicateCoroutinesApi::class)
+  override fun verifyAsync(jwt: String) = GlobalScope.promise {
     verify(jwt)
   }
 }

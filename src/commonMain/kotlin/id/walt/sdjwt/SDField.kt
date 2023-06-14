@@ -1,7 +1,6 @@
 package id.walt.sdjwt
 
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.*
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -16,4 +15,35 @@ import kotlin.js.JsExport
 data class SDField(
   val sd: Boolean,
   val children: SDMap? = null
-)
+) {
+
+  @JsExport.Ignore
+  fun toJSON(): JsonObject {
+    return buildJsonObject {
+      put("sd", sd)
+      children?.also {
+        put("children", it.toJSON())
+      }
+    }
+  }
+
+  @JsExport.Ignore
+  companion object {
+    @JsExport.Ignore
+    fun fromJSON(json: JsonElement): SDField {
+      println("Parsing SDField from $json")
+      return SDField(
+        sd = json.jsonObject["sd"]?.jsonPrimitive?.boolean ?: throw Exception("Error parsing SDField.sd from JSON element"),
+        children = json.jsonObject["children"]?.let { children ->
+          if(children is JsonObject) {
+            children.jsonObject.let { SDMap.fromJSON(it) }
+          } else if(children is JsonNull) {
+            null
+          } else {
+            throw Exception("Error parsing SDField.children from JSON element")
+          }
+        }
+      )
+    }
+  }
+}

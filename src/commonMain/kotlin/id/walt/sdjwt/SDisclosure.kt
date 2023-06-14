@@ -17,7 +17,7 @@ import kotlin.js.JsExport
  */
 @ExperimentalJsExport
 @JsExport
-data class SDisclosure(
+data class SDisclosure internal constructor (
   val disclosure: String,
   val salt: String,
   val key: String,
