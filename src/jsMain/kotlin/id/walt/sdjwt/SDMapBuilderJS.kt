@@ -22,4 +22,8 @@ class SDMapBuilderJS(
       fields, DecoyMode.valueOf(decoyMode), numDecoys
     ).toJSON().toString())
   }
+
+  fun buildFromJsonPaths(jsonPaths: Array<String>): dynamic {
+    return JSON.parse(SDMap.generateSDMap(jsonPaths.toList(), decoyMode = DecoyMode.valueOf(decoyMode), numDecoys).toJSON().toString())
+  }
 }
