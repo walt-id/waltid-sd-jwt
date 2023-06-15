@@ -1,13 +1,15 @@
+import org.apache.tools.ant.util.Base64Converter
 import org.jetbrains.kotlin.utils.addToStdlib.cast
 import org.jetbrains.kotlin.utils.addToStdlib.castAll
 
 plugins {
     kotlin("multiplatform") version "1.8.21"
+    id("dev.petuska.npm.publish") version "3.3.1"
     `maven-publish`
 }
 
 group = "id.walt"
-version = "1.SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -109,6 +111,22 @@ kotlin {
                     username = secretMavenUsername
                     password = secretMavenPassword
                 }
+            }
+        }
+    }
+}
+
+npmPublish {
+    registries {
+        if(Regex("\\d+.\\d+.\\d+").matches(version.get())) {
+            register("npmjs") {
+                uri.set(uri("https://registry.npmjs.org"))
+                val envToken = System.getenv("NPM_TOKEN")
+
+                val npmTokenFile = File("secret_npm_token.txt")
+
+                val secretNpmToken = envToken ?: npmTokenFile.let { if (it.isFile) it.readLines().first() else "" }
+                authToken.set(secretNpmToken)
             }
         }
     }
