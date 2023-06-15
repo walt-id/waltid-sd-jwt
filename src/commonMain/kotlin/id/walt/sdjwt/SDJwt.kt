@@ -42,6 +42,10 @@ open class SDJwt internal constructor (
   val digestedDisclosures
     get() = sdPayload.digestedDisclosures
 
+  @JsName("zzz_unused_sdMap")
+  val sdMap
+    get() = sdPayload.sdMap
+
   /**
    * Signature algorithm from JWT header
    */

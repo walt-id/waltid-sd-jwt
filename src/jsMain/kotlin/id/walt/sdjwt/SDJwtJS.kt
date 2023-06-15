@@ -34,6 +34,10 @@ class SDJwtJS(
   val fullPayloadJS
     get() = JSON.parse<dynamic>(sdPayload.fullPayload.toString())
 
+  @JsName("sdMap")
+  val sdMapJS
+    get() = JSON.parse<dynamic>(sdPayload.sdMap.toJSON().toString())
+
   @OptIn(DelicateCoroutinesApi::class)
   @JsName("verifyAsync")
   fun verifyAsyncJs(jwtCryptoProvider: JSAsyncJWTCryptoProvider): Promise<VerificationResult<SDJwtJS>> = GlobalScope.promise {
