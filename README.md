@@ -90,6 +90,31 @@ dependencies {
 }
 ```
 
+## Usage with NPM / NodeJs / JavaScript
+
+NPM package will be released soon. JavaScript support is available.
+
+For manual build:
+
+`./gradlew jsNodeProductionLibraryPrepare jsNodeProductionLibraryDistribution`
+
+Then include in your NodeJS project like this:
+
+`npm install /path/to/waltid-sd-jwt/build/productionLibrary`
+
+**NodeJS example**
+
+Example script in:
+
+`examples/js`
+
+Execute like:
+
+```bash
+npm install
+node index.js
+```
+
 ## Examples
 ### Kotlin / JVM
 

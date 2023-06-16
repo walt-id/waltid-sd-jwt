@@ -5,6 +5,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 
 /**
  * Selective Disclosure for a given payload field. Contains salt, field key and field value.
@@ -13,7 +15,9 @@ import kotlinx.serialization.json.jsonPrimitive
  * @param key Field key
  * @param value Field value
  */
-data class SDisclosure(
+@ExperimentalJsExport
+@JsExport
+data class SDisclosure internal constructor (
   val disclosure: String,
   val salt: String,
   val key: String,

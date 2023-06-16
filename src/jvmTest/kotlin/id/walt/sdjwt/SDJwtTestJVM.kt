@@ -11,6 +11,7 @@ import io.kotest.matchers.maps.shouldNotContainKey
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import kotlin.js.ExperimentalJsExport
 import kotlin.test.Test
 
 class SDJwtTestJVM {
@@ -42,14 +43,14 @@ class SDJwtTestJVM {
     // Print SD-JWT
     println(sdJwt)
 
-    sdJwt.sdPayload.undisclosedPayload shouldNotContainKey "sub"
-    sdJwt.sdPayload.undisclosedPayload shouldContainKey SDJwt.DIGESTS_KEY
-    sdJwt.sdPayload.undisclosedPayload shouldContainKey "aud"
+    sdJwt.undisclosedPayload shouldNotContainKey "sub"
+    sdJwt.undisclosedPayload shouldContainKey SDJwt.DIGESTS_KEY
+    sdJwt.undisclosedPayload shouldContainKey "aud"
     sdJwt.disclosures shouldHaveSize 1
-    sdJwt.sdPayload.digestedDisclosures[sdJwt.sdPayload.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray[0].jsonPrimitive.content]!!.key shouldBe "sub"
-    sdJwt.sdPayload.fullPayload.toString() shouldMatchJson originalClaimsSet.toString()
+    sdJwt.digestedDisclosures[sdJwt.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray[0].jsonPrimitive.content]!!.key shouldBe "sub"
+    sdJwt.fullPayload.toString() shouldMatchJson originalClaimsSet.toString()
 
-    sdJwt.verify(cryptoProvider) shouldBe true
+    sdJwt.verify(cryptoProvider).verified shouldBe true
   }
 
   @Test
@@ -66,9 +67,7 @@ class SDJwtTestJVM {
     println(presentedDisclosedJwt)
 
     // present disclosing selective fields, using SDMap
-    val presentedSelectiveJwt = sdJwt.present(mapOf(
-      "sub" to SDField(true)
-    ).toSDMap())
+    val presentedSelectiveJwt = sdJwt.present(SDMapBuilder().addField("sub", true).build())
     println(presentedSelectiveJwt)
 
     // present disclosing fields, using JSON paths
@@ -85,23 +84,23 @@ class SDJwtTestJVM {
     val undisclosedJwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~"
 
     // verify and parse presented SD-JWT with all fields undisclosed, throws Exception if verification fails!
-    val parsedVerifiedUndisclosedJwt = SDJwt.verifyAndParse(undisclosedJwt, cryptoProvider)
+    val parseAndVerifyResult = SDJwt.verifyAndParse(undisclosedJwt, cryptoProvider)
 
     // print full payload with disclosed fields only
     println("Undisclosed JWT payload:")
-    println(parsedVerifiedUndisclosedJwt.sdPayload.fullPayload.toString())
+    println(parseAndVerifyResult.sdJwt.fullPayload.toString())
 
     // alternatively parse and verify in 2 steps:
     val parsedUndisclosedJwt = SDJwt.parse(undisclosedJwt)
-    val isValid = parsedUndisclosedJwt.verify(cryptoProvider)
+    val isValid = parsedUndisclosedJwt.verify(cryptoProvider).verified
     println("Undisclosed SD-JWT verified: $isValid")
 
-    val parsedVerifiedDisclosedJwt = SDJwt.verifyAndParse(
+    val parsedDisclosedJwtVerifyResult = SDJwt.verifyAndParse(
       "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVpzTFIyNWhhNGMtWS05SFcyRFVseGNnaU1ZZDMyNE5nWSJdfQ.2fsLqzujWt0hS0peLS8JLHyyo3D5KCDkNnHcBYqQwVo~WyJ4RFk5VjBtOG43am82ZURIUGtNZ1J3Iiwic3ViIiwiMTIzIl0~",
       cryptoProvider
     )
     // print full payload with disclosed fields
     println("Disclosed JWT payload:")
-    println(parsedVerifiedDisclosedJwt.sdPayload.fullPayload.toString())
+    println(parsedDisclosedJwtVerifyResult.sdJwt.fullPayload.toString())
   }
 }

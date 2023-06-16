@@ -4,13 +4,18 @@ import korlibs.crypto.SecureRandom
 import korlibs.crypto.encoding.Base64
 import korlibs.crypto.sha256
 import kotlinx.serialization.json.*
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+import kotlin.js.JsName
 
 /**
  * Payload object of the SD-JWT, representing the undisclosed payload from the JWT body and the selective disclosures, appended to the JWT token
  * @param undisclosedPayload  Undisclosed payload JSON object, as contained in the JWT body
  * @param digestedDisclosures Map of digests to parsed disclosures, which are appended to the JWT token
  */
-data class SDPayload (
+@ExperimentalJsExport
+@JsExport
+data class SDPayload internal constructor (
   val undisclosedPayload: JsonObject,
   val digestedDisclosures: Map<String, SDisclosure> = mapOf(),
 ) {
@@ -106,6 +111,7 @@ data class SDPayload (
     disclosePayloadRecursively(undisclosedPayload, it)
   }.isEmpty()
 
+  @JsExport.Ignore // see SDPayloadBuilder for JS support
   companion object {
 
     private fun digest(value: String): String {
@@ -192,10 +198,12 @@ data class SDPayload (
     }
 
     /**
-     * Create SD payload object, based on full payload and disclosure map
+     * Create SD payload object, based on full payload and disclosure map.
+     * **Not supported on JavaScript**, use _SDPayloadBuilder_ instead.
      * @param fullPayload Full payload with all fields contained
      * @param disclosureMap SDMap indicating selective disclosure for each payload field recursively, and decoy properties for issuance
      */
+    @JsExport.Ignore
     fun createSDPayload(fullPayload: JsonObject, disclosureMap: SDMap): SDPayload {
       val digestedDisclosures = mutableMapOf<String, SDisclosure>()
       return SDPayload(
@@ -205,30 +213,36 @@ data class SDPayload (
     }
 
     /**
-     * Create SD payload with JWT claims set (from platform dependent claims set object) and disclosure map
+     * Create SD payload with JWT claims set (from platform dependent claims set object) and disclosure map.
+     * **Not supported on JavaScript**, use _SDPayloadBuilder_ instead.
      * @param jwtClaimsSet Full payload with all fields contained
      * @param disclosureMap SDMap indicating selective disclosure for each payload field recursively, and decoy properties for issuance
      */
+    @JsExport.Ignore
     fun createSDPayload(jwtClaimsSet: JWTClaimsSet, disclosureMap: SDMap)
       = createSDPayload(Json.parseToJsonElement(jwtClaimsSet.toString()).jsonObject, disclosureMap)
 
     /**
-     * Create SD payload based on full payload and undisclosed payload
+     * Create SD payload based on full payload and undisclosed payload.
+     * **Not supported on JavaScript**, use _SDPayloadBuilder_ instead.
      * @param fullPayload Full payload containing all fields
      * @param undisclosedPayload  Payload with selectively disclosable fields removed
      * @param decoyMode **For SD-JWT issuance:** Generate decoy digests for this hierarchical level randomly or fixed, set to NONE for parsed SD-JWTs, **for presentation:** _unused_
      * @param decoys  **For SD-JWT issuance:** Num (fixed mode) or max num (random mode) of decoy digests to add for this hierarchical level. 0 if NONE, **for presentation:** _unused_.
      */
+    @JsExport.Ignore
     fun createSDPayload(fullPayload: JsonObject, undisclosedPayload: JsonObject, decoyMode: DecoyMode = DecoyMode.NONE, decoys: Int = 0)
       = createSDPayload(fullPayload, SDMap.generateSDMap(fullPayload, undisclosedPayload, decoyMode, decoys))
 
     /**
-     * Create SD payload based on full payload as JWT claims set and undisclosed payload
+     * Create SD payload based on full payload as JWT claims set and undisclosed payload.
+     * **Not supported on JavaScript**, use _SDPayloadBuilder_ instead.
      * @param fullJWTClaimsSet Full payload containing all fields
      * @param undisclosedPayload  Payload with selectively disclosable fields removed
      * @param decoyMode **For SD-JWT issuance:** Generate decoy digests for this hierarchical level randomly or fixed, set to NONE for parsed SD-JWTs, **for presentation:** _unused_
      * @param decoys  **For SD-JWT issuance:** Num (fixed mode) or max num (random mode) of decoy digests to add for this hierarchical level. 0 if NONE, **for presentation:** _unused_.
      */
+    @JsExport.Ignore
     fun createSDPayload(fullJWTClaimsSet: JWTClaimsSet, undisclosedJWTClaimsSet: JWTClaimsSet, decoyMode: DecoyMode = DecoyMode.NONE, decoys: Int = 0)
       = createSDPayload(
         Json.parseToJsonElement(fullJWTClaimsSet.toString()).jsonObject,

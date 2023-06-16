@@ -5,7 +5,7 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import kotlinx.serialization.json.JsonObject
 
-actual class SimpleJWTCryptoProvider(
+class SimpleJWTCryptoProvider(
   val jwsAlgorithm: JWSAlgorithm,
   private val jwsSigner: JWSSigner?,
   private val jwsVerifier: JWSVerifier?
@@ -23,11 +23,13 @@ actual class SimpleJWTCryptoProvider(
     }.serialize()
   }
 
-  override fun verify(jwt: String): Boolean {
+  override fun verify(jwt: String): JwtVerificationResult {
     if(jwsVerifier == null) {
       throw Exception("No verifier available")
     }
-    return SignedJWT.parse(jwt).verify(jwsVerifier)
+    return JwtVerificationResult(
+      SignedJWT.parse(jwt).verify(jwsVerifier)
+    )
   }
 }
 

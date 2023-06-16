@@ -1,8 +1,10 @@
+import org.apache.tools.ant.util.Base64Converter
 import org.jetbrains.kotlin.utils.addToStdlib.cast
 import org.jetbrains.kotlin.utils.addToStdlib.castAll
 
 plugins {
     kotlin("multiplatform") version "1.8.21"
+    id("dev.petuska.npm.publish") version "3.3.1"
     `maven-publish`
 }
 
@@ -29,6 +31,10 @@ kotlin {
                 }
             }
         }
+        nodejs() {
+            generateTypeScriptDefinitions()
+        }
+        binaries.library()
     }
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
@@ -46,6 +52,7 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
                 implementation("com.soywiz.korlibs.krypto:krypto:$kryptoVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
             }
         }
         val commonTest by getting {
@@ -70,8 +77,14 @@ kotlin {
                 implementation("io.kotest:kotest-assertions-json:5.5.5")
             }
         }
-        val jsMain by getting
-        val jsTest by getting
+        val jsMain by getting {
+            dependencies {
+                implementation(npm("jose", "~4.14.4"))
+            }
+        }
+        val jsTest by getting {
+
+        }
         val nativeMain by getting
         val nativeTest by getting
     }
@@ -98,6 +111,22 @@ kotlin {
                     username = secretMavenUsername
                     password = secretMavenPassword
                 }
+            }
+        }
+    }
+}
+
+npmPublish {
+    registries {
+        if(Regex("\\d+.\\d+.\\d+").matches(version.get())) {
+            register("npmjs") {
+                uri.set(uri("https://registry.npmjs.org"))
+                val envToken = System.getenv("NPM_TOKEN")
+
+                val npmTokenFile = File("secret_npm_token.txt")
+
+                val secretNpmToken = envToken ?: npmTokenFile.let { if (it.isFile) it.readLines().first() else "" }
+                authToken.set(secretNpmToken)
             }
         }
     }
