@@ -37,3 +37,5 @@ yarn.lock
 /secret_maven_password.txt
 /secret_maven_username.txt
 /secret_npm_token.txt
+/examples/js/node_modules/
+/examples/js/package-lock.json
