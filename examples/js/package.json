@@ -11,6 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "jose": "^4.14.4",
-    "waltid-sd-jwt": "file:../../build/productionLibrary"
+    "waltid-sd-jwt": "^1.2306191208.0"
   }
 }

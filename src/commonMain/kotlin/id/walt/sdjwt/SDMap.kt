@@ -79,13 +79,17 @@ class SDMap internal constructor(
      * @param decoyMode **For SD-JWT issuance:** Generate decoy digests for this hierarchical level randomly or fixed, set to NONE for parsed SD-JWTs, **for presentation:** _unused_
      * @param decoys  **For SD-JWT issuance:** Num (fixed mode) or max num (random mode) of decoy digests to add for this hierarchical level. 0 if NONE, **for presentation:** _unused_.
      */
-    fun generateSDMap(jsonPaths: Collection<String>, decoyMode: DecoyMode = DecoyMode.NONE, decoys: Int = 0): SDMap {
+    fun generateSDMap(jsonPaths: Collection<String>, decoyMode: DecoyMode = DecoyMode.NONE, decoys: Int = 0)
+      = doGenerateSDMap(jsonPaths, decoyMode, decoys, jsonPaths.toSet(), "")
+
+    private fun doGenerateSDMap(jsonPaths: Collection<String>, decoyMode: DecoyMode = DecoyMode.NONE, decoys: Int, sdPaths: Set<String>, parent: String): SDMap {
       val pathMap = jsonPaths.map { path -> Pair(path.substringBefore("."), path.substringAfter(".", "")) }
         .groupBy({ p -> p.first }, { p -> p.second }).mapValues { entry -> entry.value.filterNot { it.isEmpty() } }
       return pathMap.mapValues {
+        val currentPath = listOf(parent, it.key).filter { it.isNotEmpty() }.joinToString(".")
         SDField(
-          true, if (it.value.isNotEmpty()) {
-            generateSDMap(it.value, decoyMode, decoys)
+          sdPaths.contains(currentPath), if (it.value.isNotEmpty()) {
+            doGenerateSDMap(it.value, decoyMode, decoys, sdPaths, currentPath)
           } else null
         )
       }.toSDMap(decoyMode, decoys)

@@ -107,4 +107,20 @@ class SDJwtTest {
     val numSdFieldsLevel2 = sdPayload_4.sdMap["nestedObject"]!!.children!!.count { it.value.sd }
     nestedDisclosure.value.jsonObject[SDJwt.DIGESTS_KEY]!!.jsonArray.size shouldBe numSdFieldsLevel2 + 5
   }
+
+  @Test
+  fun testSdMapFromJsonPaths() {
+    val sdmap1 = SDMap.generateSDMap(listOf("credentialSubject", "credentialSubject.firstName"))
+    sdmap1 shouldContainKey "credentialSubject"
+    sdmap1["credentialSubject"]!!.sd shouldBe true
+    sdmap1["credentialSubject"]!!.children!! shouldContainKey "firstName"
+    sdmap1["credentialSubject"]!!.children!!["firstName"]!!.sd shouldBe true
+
+    val sdmap2 = SDMap.generateSDMap(listOf("credentialSubject.firstName"))
+    sdmap2 shouldContainKey "credentialSubject"
+    sdmap2["credentialSubject"]!!.sd shouldBe false
+    sdmap2["credentialSubject"]!!.children!! shouldContainKey "firstName"
+    sdmap2["credentialSubject"]!!.children!!["firstName"]!!.sd shouldBe true
+
+  }
 }
