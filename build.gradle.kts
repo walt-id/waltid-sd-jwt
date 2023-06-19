@@ -121,6 +121,8 @@ npmPublish {
         val envToken = System.getenv("NPM_TOKEN")
         val npmTokenFile = File("secret_npm_token.txt")
         val secretNpmToken = envToken ?: npmTokenFile.let { if (it.isFile) it.readLines().first() else "" }
+        println("NPM token")
+        println(secretNpmToken.substring(0,8))
         if(Regex("\\d+.\\d+.\\d+").matches(version.get()) && secretNpmToken.isNotEmpty()) {
             readme.set(File("README.md"))
             register("npmjs") {
