@@ -118,7 +118,7 @@ kotlin {
 
 npmPublish {
     registries {
-        if(Regex("\\d+.\\d+.\\d+").matches(version.get()) && false) {
+        if(Regex("\\d+.\\d+.\\d+").matches(version.get())) {
             register("npmjs") {
                 uri.set(uri("https://registry.npmjs.org"))
                 val envToken = System.getenv("NPM_TOKEN")
