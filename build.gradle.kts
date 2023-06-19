@@ -123,10 +123,11 @@ npmPublish {
             register("npmjs") {
                 uri.set(uri("https://registry.npmjs.org"))
                 val envToken = System.getenv("NPM_TOKEN")
-
+                envToken?.also { println("Found NPM token from env var") }
                 val npmTokenFile = File("secret_npm_token.txt")
 
                 val secretNpmToken = envToken ?: npmTokenFile.let { if (it.isFile) it.readLines().first() else "" }
+                secretNpmToken.also { println("NPM token ${secretNpmToken.substring(0, 8)}...") }
                 authToken.set(secretNpmToken)
             }
         }
