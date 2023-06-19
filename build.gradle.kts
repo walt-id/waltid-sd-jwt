@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "id.walt"
-version = "1.SNAPSHOT"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -118,16 +118,13 @@ kotlin {
 
 npmPublish {
     registries {
-        if(Regex("\\d+.\\d+.\\d+").matches(version.get())) {
+        val envToken = System.getenv("NPM_TOKEN")
+        val npmTokenFile = File("secret_npm_token.txt")
+        val secretNpmToken = envToken ?: npmTokenFile.let { if (it.isFile) it.readLines().first() else "" }
+        if(Regex("\\d+.\\d+.\\d+").matches(version.get()) && secretNpmToken.isNotEmpty()) {
             readme.set(File("README.md"))
             register("npmjs") {
                 uri.set(uri("https://registry.npmjs.org"))
-                val envToken = System.getenv("NPM_TOKEN")
-                envToken?.also { println("Found NPM token from env var") }
-                val npmTokenFile = File("secret_npm_token.txt")
-
-                val secretNpmToken = envToken ?: npmTokenFile.let { if (it.isFile) it.readLines().first() else "" }
-                secretNpmToken.also { println("NPM token ${secretNpmToken.substring(0, 8)}...") }
                 authToken.set(secretNpmToken)
             }
         }
