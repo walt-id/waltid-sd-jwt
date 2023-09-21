@@ -1,5 +1,6 @@
 package id.walt.sdjwt
 
+import dev.whyoleg.cryptography.random.CryptographyRandom
 import korlibs.crypto.SecureRandom
 import korlibs.crypto.encoding.Base64
 import korlibs.crypto.sha256
@@ -120,7 +121,7 @@ data class SDPayload internal constructor (
     }
 
     private fun generateSalt(): String {
-      val randomness = SecureRandom.nextBytes(16)
+      val randomness = CryptographyRandom.nextBytes(16)
       return Base64.encode(randomness, url = true)
     }
 
