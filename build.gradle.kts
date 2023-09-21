@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.utils.addToStdlib.cast
 import org.jetbrains.kotlin.utils.addToStdlib.castAll
 
 plugins {
-    kotlin("multiplatform") version "1.8.21"
+    kotlin("multiplatform") version "1.9.10"
     id("dev.petuska.npm.publish") version "3.3.1"
     `maven-publish`
 }
@@ -50,6 +50,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation("dev.whyoleg.cryptography:cryptography-random:0.2.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
                 implementation("com.soywiz.korlibs.krypto:krypto:$kryptoVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
