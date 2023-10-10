@@ -11,7 +11,7 @@ class SimpleJWTCryptoProvider(
   private val jwsVerifier: JWSVerifier?
 ) : JWTCryptoProvider {
 
-  override fun sign(payload: JsonObject, keyID: String?): String {
+  override fun sign(payload: JsonObject, keyID: String?, typ: String): String {
     if(jwsSigner == null) {
       throw Exception("No signer available")
     }
