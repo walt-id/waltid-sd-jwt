@@ -198,9 +198,9 @@ open class SDJwt internal constructor (
      * @param withHolderJwt Optionally, append the given holder binding JWT to the signed SD-JWT token
      * @return  The signed SDJwt object
      */
-    fun sign(sdPayload: SDPayload, jwtCryptoProvider: JWTCryptoProvider, keyID: String? = null, withHolderJwt: String? = null): SDJwt
+    fun sign(sdPayload: SDPayload, jwtCryptoProvider: JWTCryptoProvider, keyID: String? = null, withHolderJwt: String? = null, typ: String = "JWT"): SDJwt
       = createFromSignedJwt(
-        jwtCryptoProvider.sign(sdPayload.undisclosedPayload, keyID), sdPayload, withHolderJwt
+        jwtCryptoProvider.sign(sdPayload.undisclosedPayload, keyID, typ), sdPayload, withHolderJwt
       )
 
     /**
