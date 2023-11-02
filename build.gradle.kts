@@ -1,11 +1,8 @@
-import org.apache.tools.ant.util.Base64Converter
-import org.jetbrains.kotlin.utils.addToStdlib.cast
-import org.jetbrains.kotlin.utils.addToStdlib.castAll
-
 plugins {
-    kotlin("multiplatform") version "1.9.10"
-    id("dev.petuska.npm.publish") version "3.3.1"
+    kotlin("multiplatform") version "1.9.20"
+    id("dev.petuska.npm.publish") version "3.4.1"
     `maven-publish`
+    id("com.github.ben-manes.versions") version "0.49.0"
 }
 
 group = "id.walt"
@@ -25,13 +22,19 @@ kotlin {
     }
     js(IR) {
         browser {
-            commonWebpackConfig {
+            commonWebpackConfig(Action {
                 cssSupport {
                     enabled.set(true)
                 }
-            }
+            })
+
+            testTask(Action {
+                useKarma {
+                    useChromiumHeadless()
+                }
+            })
         }
-        nodejs() {
+        nodejs {
             generateTypeScriptDefinitions()
         }
         binaries.library()
@@ -44,38 +47,38 @@ kotlin {
         isMingwX64 -> mingwX64("native")
         else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
     }
-    val kryptoVersion = "4.0.1"
+    val kryptoVersion = "4.0.10"
 
-    
+
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation("dev.whyoleg.cryptography:cryptography-random:0.2.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
                 implementation("com.soywiz.korlibs.krypto:krypto:$kryptoVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                implementation("io.kotest:kotest-assertions-core:5.5.5")
+                implementation("io.kotest:kotest-assertions-core:5.7.2")
 
-                implementation("io.kotest:kotest-assertions-json:5.5.5")
+                implementation("io.kotest:kotest-assertions-json:5.7.2")
             }
         }
         val jvmMain by getting {
             dependencies {
-                implementation("com.nimbusds:nimbus-jose-jwt:9.30.2")
+                implementation("com.nimbusds:nimbus-jose-jwt:9.37")
             }
         }
         val jvmTest by getting {
             dependencies {
-                implementation("io.mockk:mockk:1.13.2")
+//              implementation("io.mockk:mockk:1.13.2")
 
-                implementation("io.kotest:kotest-runner-junit5:5.5.5")
-                implementation("io.kotest:kotest-assertions-core:5.5.5")
-                implementation("io.kotest:kotest-assertions-json:5.5.5")
+                implementation("io.kotest:kotest-runner-junit5:5.7.2")
+                implementation("io.kotest:kotest-assertions-core:5.7.2")
+                implementation("io.kotest:kotest-assertions-json:5.7.2")
             }
         }
         val jsMain by getting {
@@ -126,7 +129,7 @@ npmPublish {
         val isReleaseBuild = Regex("\\d+.\\d+.\\d+").matches(version.get())
         println("NPM token: ${hasNPMToken}")
         println("Release build: ${isReleaseBuild}")
-        if(isReleaseBuild && hasNPMToken) {
+        if (isReleaseBuild && hasNPMToken) {
             readme.set(File("README.md"))
             register("npmjs") {
                 uri.set(uri("https://registry.npmjs.org"))
