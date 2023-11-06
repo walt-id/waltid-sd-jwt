@@ -1,6 +1,6 @@
 package id.walt.sdjwt
 
-import io.kotest.assertions.json.shouldMatchJson
+import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotContain
@@ -48,7 +48,7 @@ class SDJwtTestJS {
         sdJwt.disclosures shouldHaveSize 1
         sdJwt.digestedDisclosures[sdJwt.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray[0].jsonPrimitive.content]!!.key shouldBe "sub"
         println("BLA")
-        sdJwt.fullPayload.toString() shouldMatchJson JSON.stringify(originalClaimsSet)
+        sdJwt.fullPayload.toString() shouldEqualJson JSON.stringify(originalClaimsSet)
         println("ASDASD")
 
         sdJwt.verifyAsync(cryptoProvider).verified shouldBe true

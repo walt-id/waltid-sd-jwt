@@ -4,7 +4,7 @@ import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.crypto.MACSigner
 import com.nimbusds.jose.crypto.MACVerifier
 import com.nimbusds.jwt.JWTClaimsSet
-import io.kotest.assertions.json.shouldMatchJson
+import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.maps.shouldNotContainKey
@@ -47,7 +47,7 @@ class SDJwtTestJVM {
         sdJwt.undisclosedPayload shouldContainKey "aud"
         sdJwt.disclosures shouldHaveSize 1
         sdJwt.digestedDisclosures[sdJwt.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray[0].jsonPrimitive.content]!!.key shouldBe "sub"
-        sdJwt.fullPayload.toString() shouldMatchJson originalClaimsSet.toString()
+        sdJwt.fullPayload.toString() shouldEqualJson originalClaimsSet.toString()
 
         sdJwt.verify(cryptoProvider).verified shouldBe true
     }

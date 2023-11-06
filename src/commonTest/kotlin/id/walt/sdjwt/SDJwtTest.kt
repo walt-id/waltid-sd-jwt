@@ -1,6 +1,6 @@
 package id.walt.sdjwt
 
-import io.kotest.assertions.json.shouldMatchJson
+import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.collections.shouldNotContainAnyOf
 import io.kotest.matchers.ints.shouldBeInRange
 import io.kotest.matchers.maps.shouldContainKey
@@ -42,7 +42,7 @@ class SDJwtTest {
 
         sdPayload_1.undisclosedPayload shouldContainKey SDJwt.DIGESTS_KEY
         sdPayload_1.undisclosedPayload.keys shouldNotContainAnyOf setOf("sub", "nestedObject")
-        sdPayload_1.fullPayload.toString() shouldMatchJson fullPayload.toString()
+        sdPayload_1.fullPayload.toString() shouldEqualJson fullPayload.toString()
         sdPayload_1.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray.size shouldBe sdPayload_1.digestedDisclosures.size
 
 
@@ -55,7 +55,7 @@ class SDJwtTest {
         sdPayload_2.undisclosedPayload shouldNotContainKey "sub"
         sdPayload_2.undisclosedPayload["nestedObject"]!!.jsonObject shouldContainKey SDJwt.DIGESTS_KEY
         sdPayload_2.undisclosedPayload["nestedObject"]!!.jsonObject shouldNotContainKey "arrProp"
-        sdPayload_2.fullPayload.toString() shouldMatchJson fullPayload.toString()
+        sdPayload_2.fullPayload.toString() shouldEqualJson fullPayload.toString()
         (sdPayload_2.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray.size +
                 sdPayload_2.undisclosedPayload["nestedObject"]!!.jsonObject[SDJwt.DIGESTS_KEY]!!.jsonArray.size) shouldBe sdPayload_2.digestedDisclosures.size
 
@@ -77,7 +77,7 @@ class SDJwtTest {
         nestedDisclosure shouldNotBe null
         nestedDisclosure!!.value.jsonObject shouldContainKey SDJwt.DIGESTS_KEY
         nestedDisclosure.value.jsonObject shouldNotContainKey "arrProp"
-        sdPayload_3.fullPayload.toString() shouldMatchJson fullPayload.toString()
+        sdPayload_3.fullPayload.toString() shouldEqualJson fullPayload.toString()
         sdPayload_3.undisclosedPayload[SDJwt.DIGESTS_KEY]!!.jsonArray.size +
                 nestedDisclosure.value.jsonObject[SDJwt.DIGESTS_KEY]!!.jsonArray.size shouldBe sdPayload_3.digestedDisclosures.size
     }
