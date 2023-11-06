@@ -6,18 +6,19 @@ import kotlinx.serialization.json.jsonObject
 @ExperimentalJsExport
 @JsExport
 class SDPayloadBuilder(
-  val fullPayload: dynamic
+    val fullPayload: dynamic
 ) {
-  fun buildForUndisclosedPayload(undisclosedSDPayload: dynamic): SDPayload {
-    return SDPayload.createSDPayload(
-      Json.parseToJsonElement(JSON.stringify(fullPayload)).jsonObject,
-      Json.parseToJsonElement(JSON.stringify(undisclosedSDPayload)).jsonObject)
-  }
+    fun buildForUndisclosedPayload(undisclosedSDPayload: dynamic): SDPayload {
+        return SDPayload.createSDPayload(
+            Json.parseToJsonElement(JSON.stringify(fullPayload)).jsonObject,
+            Json.parseToJsonElement(JSON.stringify(undisclosedSDPayload)).jsonObject
+        )
+    }
 
-  fun buildForSDMap(sdMap: dynamic): SDPayload {
-    return SDPayload.createSDPayload(
-      Json.parseToJsonElement(JSON.stringify(fullPayload)).jsonObject,
-      SDMap.Companion.fromJSON(JSON.stringify(sdMap))
-    )
-  }
+    fun buildForSDMap(sdMap: dynamic): SDPayload {
+        return SDPayload.createSDPayload(
+            Json.parseToJsonElement(JSON.stringify(fullPayload)).jsonObject,
+            SDMap.Companion.fromJSON(JSON.stringify(sdMap))
+        )
+    }
 }

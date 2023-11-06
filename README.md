@@ -27,28 +27,29 @@ Checkout the [documentation regarding SD-JWTs](https://docs.walt.id/v/ssikit/con
 
 ## What is the SD-JWT library?
 
-This libary implements the **Selective Disclosure JWT (SD-JWT)** specification:  [draft-ietf-oauth-selective-disclosure-jwt-04](https://datatracker.ietf.org/doc/draft-ietf-oauth-selective-disclosure-jwt/04/).
+This libary implements the **Selective Disclosure JWT (SD-JWT)**
+specification:  [draft-ietf-oauth-selective-disclosure-jwt-04](https://datatracker.ietf.org/doc/draft-ietf-oauth-selective-disclosure-jwt/04/).
 
 ### Features
 
 * **Create and sign** SD-JWT tokens
-  * Choose selectively disclosable payload fields (SD fields)
-  * Create digests for SD fields and insert into JWT body payload
-  * Create and append encoded disclosure strings for SD fields to JWT token
-  * Add random or fixed number of **decoy digests** on each nested object property
-* **Present** SD-JWT tokens 
-  * Selection of fields to be disclosed
-  * Support for appending optional holder binding
+    * Choose selectively disclosable payload fields (SD fields)
+    * Create digests for SD fields and insert into JWT body payload
+    * Create and append encoded disclosure strings for SD fields to JWT token
+    * Add random or fixed number of **decoy digests** on each nested object property
+* **Present** SD-JWT tokens
+    * Selection of fields to be disclosed
+    * Support for appending optional holder binding
 * Full support for **nested SD fields** and **recursive disclosures**
 * **Parse** SD-JWT tokens and restore original payload with disclosed fields
-* **Verify** SD-JWT token 
-  * Signature verification
-  * Hash comparison and tamper check of the appended disclosures
+* **Verify** SD-JWT token
+    * Signature verification
+    * Hash comparison and tamper check of the appended disclosures
 * Support for **integration** with various crypto libraries and frameworks, to perform the cryptographic operations and key management
-* **Multiplatform support**: 
-  * Java/JVM
-  * JavaScript
-  * Native
+* **Multiplatform support**:
+    * Java/JVM
+    * JavaScript
+    * Native
 
 ## Usage with Maven or Gradle (JVM)
 
@@ -61,33 +62,34 @@ This libary implements the **Selective Disclosure JWT (SD-JWT)** specification: 
 ```xml
 [...]
 <repositories>
-  <repository>
-    <id>waltid-ssikit</id>
-    <name>waltid-ssikit</name>
-    <url>https://maven.walt.id/repository/waltid-ssi-kit/</url>
-  </repository>
+    <repository>
+        <id>waltid-ssikit</id>
+        <name>waltid-ssikit</name>
+        <url>https://maven.walt.id/repository/waltid-ssi-kit/</url>
+    </repository>
 </repositories>
-[...]
+        [...]
 <dependency>
-    <groupId>id.walt</groupId>
-    <artifactId>waltid-sd-jwt-jvm</artifactId>
-    <version>[ version ]</version>
+<groupId>id.walt</groupId>
+<artifactId>waltid-sd-jwt-jvm</artifactId>
+<version>[ version ]</version>
 </dependency>
 ```
 
 **Gradle**
 
 _Kotlin DSL_
+
 ```kotlin
 [...]
 repositories {
-  maven("https://maven.walt.id/repository/waltid-ssi-kit/")
+    maven("https://maven.walt.id/repository/waltid-ssi-kit/")
 }
 [...]
 val sdJwtVersion = "1.2306071235.0"
 [...]
 dependencies {
-  implementation("id.walt:waltid-sd-jwt-jvm:$sdJwtVersion")
+    implementation("id.walt:waltid-sd-jwt-jvm:$sdJwtVersion")
 }
 ```
 
@@ -119,17 +121,19 @@ node index.js
 ```
 
 ## Examples
+
 ### Kotlin / JVM
 
 #### Create and sign an SD-JWT using the NimbusDS-based JWT crypto provider
 
-This example creates and signs an SD-JWT, using the SimpleJWTCryptoProvider implementation, that's shipped with the waltid-sd-jwt library, which uses the `nimbus-jose-jwt` library for cryptographic operations. 
+This example creates and signs an SD-JWT, using the SimpleJWTCryptoProvider implementation, that's shipped with the waltid-sd-jwt library,
+which uses the `nimbus-jose-jwt` library for cryptographic operations.
 
 In this example we sign the JWT with the HS256 algorithm, and a UUID as a shared secret.
 
 Here we generate the SD payload, by comparing the full payload and the undisclosed payload (with selective fields removed).
 
-Alternatively, we can create the SD payload by specifying the SDMap, which indicates the selective disclosure for each field. 
+Alternatively, we can create the SD payload by specifying the SDMap, which indicates the selective disclosure for each field.
 This approach also allows more fine-grained control, particularly in regard to recursive disclosures and nested payload fields.
 
 ```kotlin
@@ -222,14 +226,16 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVp
 
 #### Parse and verify an SD-JWT using the NimbusDS-based JWT crypto provider
 
-This example shows how to parse and verify the SD-JWT, created and presented in the previous examples, and how to restore its original payload, with the disclosed payload fields only.
+This example shows how to parse and verify the SD-JWT, created and presented in the previous examples, and how to restore its original
+payload, with the disclosed payload fields only.
 
 For verification, we use the same shared secret as before and a `MACVerifier` with the `SimpleJWTCryptoProvider`.
 
-The parsing and verification can be done in one step using the `SDJwt.verifyAndParse()` method, throwing an exception if verification fails, 
+The parsing and verification can be done in one step using the `SDJwt.verifyAndParse()` method, throwing an exception if verification fails,
 or in two steps using the `SDJwt.parse()` method followed by the member method `SDJwt.verify()`, which returns true or false.
 
 The output below shows the restored JWT body payloads, with the selectively disclosable field `sub` disclosed or undisclosed.
+
 ```kotlin
 // Shared secret for HMAC crypto algorithm
 private val sharedSecret = "ef23f749-7238-481a-815c-f0c2157dfa8e"
@@ -275,9 +281,11 @@ Disclosed JWT payload:
 
 #### Integrate with custom JWT crypto provider
 
-To integrate with your custom JWT crypto provider, on your platform, you need to override and implement the `JWTCryptoProvider` interface, which has two interface methods to sign and verify standard JWT tokens.
+To integrate with your custom JWT crypto provider, on your platform, you need to override and implement the `JWTCryptoProvider` interface,
+which has two interface methods to sign and verify standard JWT tokens.
 
-In this example, you see how I made use of this interface to implement the JWT crypto provider based on the NimbusDS Jose/JWT library for JVM:
+In this example, you see how I made use of this interface to implement the JWT crypto provider based on the NimbusDS Jose/JWT library for
+JVM:
 
 ```kotlin
 import com.nimbusds.jose.*
@@ -321,7 +329,9 @@ class SimpleJWTCryptoProvider(
 }
 ```
 
-The custom JWT crypto provider can now be used like shown in the examples above, for [signing](#create-and-sign-an-sd-jwt-using-the-nimbusds-based-jwt-crypto-provider) and [verifying](#parse-and-verify-an-sd-jwt-using-the-nimbusds-based-jwt-crypto-provider) SD-JWTs.
+The custom JWT crypto provider can now be used like shown in the examples above,
+for [signing](#create-and-sign-an-sd-jwt-using-the-nimbusds-based-jwt-crypto-provider)
+and [verifying](#parse-and-verify-an-sd-jwt-using-the-nimbusds-based-jwt-crypto-provider) SD-JWTs.
 
 ### JavaScript / NodeJS
 
@@ -335,22 +345,21 @@ import sdlib from "waltid-sd-jwt"
 const sharedSecret = "ef23f749-7238-481a-815c-f0c2157dfa8e"
 const cryptoProvider = new sdlib.id.walt.sdjwt.SimpleAsyncJWTCryptoProvider("HS256", new TextEncoder().encode(sharedSecret))
 
-const sdMap = new sdlib.id.walt.sdjwt.SDMapBuilder(sdlib.id.walt.sdjwt.DecoyMode.FIXED.name, 2).
-addField("sub", true,
-  new sdlib.id.walt.sdjwt.SDMapBuilder().addField("child", true).build()
+const sdMap = new sdlib.id.walt.sdjwt.SDMapBuilder(sdlib.id.walt.sdjwt.DecoyMode.FIXED.name, 2).addField("sub", true,
+    new sdlib.id.walt.sdjwt.SDMapBuilder().addField("child", true).build()
 ).build()
 
 console.log(sdMap, JSON.stringify(sdMap))
 
-const sdPayload = new sdlib.id.walt.sdjwt.SDPayloadBuilder({ "sub": "123", "aud": "345" }).buildForUndisclosedPayload({"aud": "345"})
-const sdPayload2 = new sdlib.id.walt.sdjwt.SDPayloadBuilder({ "sub": "123", "aud": "345" }).buildForSDMap(sdMap)
+const sdPayload = new sdlib.id.walt.sdjwt.SDPayloadBuilder({"sub": "123", "aud": "345"}).buildForUndisclosedPayload({"aud": "345"})
+const sdPayload2 = new sdlib.id.walt.sdjwt.SDPayloadBuilder({"sub": "123", "aud": "345"}).buildForSDMap(sdMap)
 
 const jwt = await sdlib.id.walt.sdjwt.SDJwtJS.Companion.signAsync(
-  sdPayload, cryptoProvider)
+    sdPayload, cryptoProvider)
 console.log(jwt.toString())
 
 const jwt2 = await sdlib.id.walt.sdjwt.SDJwtJS.Companion.signAsync(
-  sdPayload2, cryptoProvider)
+    sdPayload2, cryptoProvider)
 console.log(jwt2.toString())
 
 console.log("Verified:", (await jwt.verifyAsync(cryptoProvider)).verified)
@@ -370,12 +379,13 @@ console.log("Presented disclosures", verificationResultPresentedJwt2.sdJwt.discl
 console.log("Presented disclosure strings", verificationResultPresentedJwt2.sdJwt.disclosures)
 console.log("Verified: ", verificationResultPresentedJwt2.verified)
 console.log("SDMap reconstructed", presentedJwt2.sdMap)
- 
+
 ```
 
 ## Join the community
 
-* Connect and get the latest updates: [Discord](https://discord.gg/AW8AgqJthZ) | [Newsletter](https://walt.id/newsletter) | [YouTube](https://www.youtube.com/channel/UCXfOzrv3PIvmur_CmwwmdLA) | [Twitter](https://mobile.twitter.com/walt_id)
+* Connect and get the latest
+  updates: [Discord](https://discord.gg/AW8AgqJthZ) | [Newsletter](https://walt.id/newsletter) | [YouTube](https://www.youtube.com/channel/UCXfOzrv3PIvmur_CmwwmdLA) | [Twitter](https://mobile.twitter.com/walt_id)
 * Get help, request features and report bugs: [GitHub Discussions](https://github.com/walt-id/.github/discussions)
 
 ## License

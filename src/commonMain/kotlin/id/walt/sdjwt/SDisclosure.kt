@@ -17,21 +17,21 @@ import kotlin.js.JsExport
  */
 @ExperimentalJsExport
 @JsExport
-data class SDisclosure internal constructor (
-  val disclosure: String,
-  val salt: String,
-  val key: String,
-  val value: JsonElement
+data class SDisclosure internal constructor(
+    val disclosure: String,
+    val salt: String,
+    val key: String,
+    val value: JsonElement
 ) {
-  companion object {
-    /**
-     * Parse an encoded disclosure string
-     */
-    fun parse(disclosure: String) = Json.parseToJsonElement(Base64.decode(disclosure, url = true).decodeToString()).jsonArray.let {
-      if(it.size != 3) {
-        throw Exception("Invalid selective disclosure")
-      }
-      SDisclosure(disclosure, it[0].jsonPrimitive.content, it[1].jsonPrimitive.content, it[2])
+    companion object {
+        /**
+         * Parse an encoded disclosure string
+         */
+        fun parse(disclosure: String) = Json.parseToJsonElement(Base64.decode(disclosure, url = true).decodeToString()).jsonArray.let {
+            if (it.size != 3) {
+                throw Exception("Invalid selective disclosure")
+            }
+            SDisclosure(disclosure, it[0].jsonPrimitive.content, it[1].jsonPrimitive.content, it[2])
+        }
     }
-  }
 }

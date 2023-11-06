@@ -3,22 +3,21 @@ import sdlib from "waltid-sd-jwt"
 const sharedSecret = "ef23f749-7238-481a-815c-f0c2157dfa8e"
 const cryptoProvider = new sdlib.id.walt.sdjwt.SimpleAsyncJWTCryptoProvider("HS256", new TextEncoder().encode(sharedSecret))
 
-const sdMap = new sdlib.id.walt.sdjwt.SDMapBuilder(sdlib.id.walt.sdjwt.DecoyMode.FIXED.name, 2).
-addField("sub", true,
-  new sdlib.id.walt.sdjwt.SDMapBuilder().addField("child", true).build()
+const sdMap = new sdlib.id.walt.sdjwt.SDMapBuilder(sdlib.id.walt.sdjwt.DecoyMode.FIXED.name, 2).addField("sub", true,
+    new sdlib.id.walt.sdjwt.SDMapBuilder().addField("child", true).build()
 ).build()
 
 console.log(sdMap, JSON.stringify(sdMap))
 
-const sdPayload = new sdlib.id.walt.sdjwt.SDPayloadBuilder({ "sub": "123", "aud": "345" }).buildForUndisclosedPayload({"aud": "345"})
-const sdPayload2 = new sdlib.id.walt.sdjwt.SDPayloadBuilder({ "sub": "123", "aud": "345" }).buildForSDMap(sdMap)
+const sdPayload = new sdlib.id.walt.sdjwt.SDPayloadBuilder({"sub": "123", "aud": "345"}).buildForUndisclosedPayload({"aud": "345"})
+const sdPayload2 = new sdlib.id.walt.sdjwt.SDPayloadBuilder({"sub": "123", "aud": "345"}).buildForSDMap(sdMap)
 
 const jwt = await sdlib.id.walt.sdjwt.SDJwtJS.Companion.signAsync(
-  sdPayload, cryptoProvider)
+    sdPayload, cryptoProvider)
 console.log(jwt.toString())
 
 const jwt2 = await sdlib.id.walt.sdjwt.SDJwtJS.Companion.signAsync(
-  sdPayload2, cryptoProvider)
+    sdPayload2, cryptoProvider)
 console.log(jwt2.toString())
 
 console.log("Verified:", (await jwt.verifyAsync(cryptoProvider)).verified)

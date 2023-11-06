@@ -14,18 +14,18 @@ import kotlin.js.JsExport
 @ExperimentalJsExport
 @JsExport.Ignore
 interface AsyncJWTCryptoProvider {
-  /**
-   * Interface method to create a signed JWT for the given JSON payload object, with an optional keyID.
-   * @param payload The JSON payload of the JWT to be signed
-   * @param keyID Optional keyID of the signing key to be used, if required by crypto provider
-   */
-  @JsExport.Ignore
-  suspend fun sign(payload: JsonObject, keyID: String? = null): String
+    /**
+     * Interface method to create a signed JWT for the given JSON payload object, with an optional keyID.
+     * @param payload The JSON payload of the JWT to be signed
+     * @param keyID Optional keyID of the signing key to be used, if required by crypto provider
+     */
+    @JsExport.Ignore
+    suspend fun sign(payload: JsonObject, keyID: String? = null): String
 
-  /**
-   * Interface method for verifying a JWT signature
-   * @param jwt A signed JWT token to be verified
-   */
-  @JsExport.Ignore
-  suspend fun verify(jwt: String): JwtVerificationResult
+    /**
+     * Interface method for verifying a JWT signature
+     * @param jwt A signed JWT token to be verified
+     */
+    @JsExport.Ignore
+    suspend fun verify(jwt: String): JwtVerificationResult
 }
