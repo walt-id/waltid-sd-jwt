@@ -1,6 +1,7 @@
 package id.walt.sdjwt
 
 import id.walt.sdjwt.DecoyMode.*
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
@@ -16,6 +17,7 @@ import kotlin.js.JsExport
  */
 @ExperimentalJsExport
 @JsExport
+@Serializable
 enum class DecoyMode {
     NONE,
     FIXED,

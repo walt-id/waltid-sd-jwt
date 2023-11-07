@@ -1,5 +1,6 @@
 package id.walt.sdjwt
 
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
@@ -12,6 +13,7 @@ import kotlin.js.JsExport
  */
 @ExperimentalJsExport
 @JsExport
+@Serializable
 data class SDField(
     val sd: Boolean,
     val children: SDMap? = null

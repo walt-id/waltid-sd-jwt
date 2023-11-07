@@ -1,5 +1,6 @@
 package id.walt.sdjwt
 
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 
 /**
@@ -8,6 +9,7 @@ import kotlinx.serialization.json.*
  * @param decoyMode **For SD-JWT issuance:** Generate decoy digests for this hierarchical level randomly or fixed, set to NONE for parsed SD-JWTs, **for presentation:** _unused_
  * @param decoys  **For SD-JWT issuance:** Num (fixed mode) or max num (random mode) of decoy digests to add for this hierarchical level. 0 if NONE, **for presentation:** _unused_
  */
+@Serializable
 class SDMap internal constructor(
     val fields: Map<String, SDField>,
     val decoyMode: DecoyMode = DecoyMode.NONE,
