@@ -1,6 +1,8 @@
 plugins {
     kotlin("multiplatform") version "1.9.20"
+
     kotlin("plugin.serialization") version "1.9.20"
+
 
     id("dev.petuska.npm.publish") version "3.4.1"
     `maven-publish`
@@ -183,7 +185,7 @@ npmPublish {
         println("NPM token: ${hasNPMToken}")
         println("Release build: ${isReleaseBuild}")
         if (isReleaseBuild && hasNPMToken) {
-            readme.set(File("README.md"))
+            readme.set(File("NPM_README.md"))
             register("npmjs") {
                 uri.set(uri("https://registry.npmjs.org"))
                 authToken.set(secretNpmToken)
