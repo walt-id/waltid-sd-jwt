@@ -1,7 +1,7 @@
 plugins {
     kotlin("multiplatform") version "1.9.20"
 
-    id("org.jetbrains.kotlin.plugin.serialization")
+    kotlin("plugin.serialization") version "1.9.0"
 
     id("dev.petuska.npm.publish") version "3.4.1"
     `maven-publish`
