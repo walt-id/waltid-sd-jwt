@@ -133,7 +133,7 @@ npmPublish {
         println("NPM token: ${hasNPMToken}")
         println("Release build: ${isReleaseBuild}")
         if (isReleaseBuild && hasNPMToken) {
-            readme.set(File("README.md"))
+            readme.set(File("NPM_README.md"))
             register("npmjs") {
                 uri.set(uri("https://registry.npmjs.org"))
                 authToken.set(secretNpmToken)
