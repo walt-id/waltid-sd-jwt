@@ -64,11 +64,11 @@ kotlin {
                 val interopTask = tasks[interopProcessingTaskName]
                 interopTask.dependsOn(":waltid-sd-jwt-ios:build${platform.capitalize()}")
 
-                defFile("$rootDir/src/nativeInterop/cinterop/waltid-sd-jwt-ios.def")
+                defFile("$projectDir/src/nativeInterop/cinterop/waltid-sd-jwt-ios.def")
                 packageName("id.walt.sdjwt.cinterop.ios")
-                includeDirs("$rootDir/waltid-sd-jwt-ios/build/Release-$platform/include/")
+                includeDirs("$projectDir/waltid-sd-jwt-ios/build/Release-$platform/include/")
 
-                headers("$rootDir/waltid-sd-jwt-ios/build/Release-$platform/include/waltid_sd_jwt_ios/waltid_sd_jwt_ios-Swift.h")
+                headers("$projectDir/waltid-sd-jwt-ios/build/Release-$platform/include/waltid_sd_jwt_ios/waltid_sd_jwt_ios-Swift.h")
             }
         }
     }

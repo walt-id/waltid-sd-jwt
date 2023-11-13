@@ -1,5 +1,5 @@
 listOf("iphoneos", "iphonesimulator").forEach { sdk ->
-    tasks.create<Exec>("build${sdk.capitalize()}") {
+    tasks.register<Exec>("build${sdk.capitalize()}") {
         group = "build"
 
         commandLine(
