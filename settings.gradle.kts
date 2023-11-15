@@ -1,0 +1,1 @@
+include(":waltid-sd-jwt-ios")
