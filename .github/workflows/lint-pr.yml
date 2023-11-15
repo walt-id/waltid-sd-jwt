@@ -21,7 +21,7 @@ jobs:
         id: lint_commit_messages
         continue-on-error: true
       - name: semantic-pull-request
-        if: always() && !contains(fromJSON(steps.lint_commit_messages.outputs.results).*.valid, true)
+        if: always() && (steps.lint_commit_messages.outputs.results == null || !contains(fromJSON(steps.lint_commit_messages.outputs.results).*.valid, true))
         id: lint_pr_title
         uses: amannn/action-semantic-pull-request@v5.2.0
         env:
