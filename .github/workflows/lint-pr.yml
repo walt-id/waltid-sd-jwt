@@ -59,7 +59,7 @@ jobs:
             ```
 
       # Delete a previous comment when the issue has been resolved
-      - if: ${{ steps.lint_pr_title.outputs.error_message == null && !contains(fromJSON(steps.lint_commit_messages.outputs.results).*.valid, false) }}
+      - if: ${{ steps.lint_pr_title.outputs.error_message == null && (steps.lint_commit_messages.outputs.results != null && !contains(fromJSON(steps.lint_commit_messages.outputs.results).*.valid, false)) }}
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: pr-title-lint-error
