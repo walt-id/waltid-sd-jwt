@@ -1,3 +1,5 @@
+# Moved to: https://github.com/walt-id/waltid-identity/tree/main/waltid-sdjwt
+
 <div align="center">
  <h1>Kotlin Multiplatform SD-JWT library</h1>
  <span>by </span><a href="https://walt.id">walt.id</a>
