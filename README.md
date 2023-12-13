@@ -1,7 +1,6 @@
 # [moved]
-<i>We're currently redesigning our products to make them more efficient and easy to work with. Future versions of this library will be realised via a new repo, which we will publish soon. You can rest assured that the structure and features supported in this repo will be exactly the same in the new one. 
 
-You can find more info about the redesign and the introduction of the community stack [here](https://walt.id/blog/p/community-stack). In the meantime, if you have any questions or concerns, please [reach out to us](https://walt.id/discord).</i>
+The repo can now be found [here](https://github.com/walt-id/waltid-identity/tree/main/waltid-sdjwt).
 
 <div align="center">
  <h1>Kotlin Multiplatform SD-JWT library</h1>
@@ -28,7 +27,8 @@ You can find more info about the redesign and the introduction of the community 
 
 ### Further information
 
-Checkout the [documentation regarding SD-JWTs](https://docs.walt.id/v/ssikit/concepts/selective-disclosure), to find out more.
+Checkout the [documentation regarding SD-JWTs](https://docs.walt.id/v/ssikit/concepts/selective-disclosure), to find out
+more.
 
 ## What is the SD-JWT library?
 
@@ -50,7 +50,8 @@ specification:  [draft-ietf-oauth-selective-disclosure-jwt-04](https://datatrack
 * **Verify** SD-JWT token
     * Signature verification
     * Hash comparison and tamper check of the appended disclosures
-* Support for **integration** with various crypto libraries and frameworks, to perform the cryptographic operations and key management
+* Support for **integration** with various crypto libraries and frameworks, to perform the cryptographic operations and
+  key management
 * **Multiplatform support**:
     * Java/JVM
     * JavaScript
@@ -131,15 +132,19 @@ node index.js
 
 #### Create and sign an SD-JWT using the NimbusDS-based JWT crypto provider
 
-This example creates and signs an SD-JWT, using the SimpleJWTCryptoProvider implementation, that's shipped with the waltid-sd-jwt library,
+This example creates and signs an SD-JWT, using the SimpleJWTCryptoProvider implementation, that's shipped with the
+waltid-sd-jwt library,
 which uses the `nimbus-jose-jwt` library for cryptographic operations.
 
 In this example we sign the JWT with the HS256 algorithm, and a UUID as a shared secret.
 
-Here we generate the SD payload, by comparing the full payload and the undisclosed payload (with selective fields removed).
+Here we generate the SD payload, by comparing the full payload and the undisclosed payload (with selective fields
+removed).
 
-Alternatively, we can create the SD payload by specifying the SDMap, which indicates the selective disclosure for each field.
-This approach also allows more fine-grained control, particularly in regard to recursive disclosures and nested payload fields.
+Alternatively, we can create the SD payload by specifying the SDMap, which indicates the selective disclosure for each
+field.
+This approach also allows more fine-grained control, particularly in regard to recursive disclosures and nested payload
+fields.
 
 ```kotlin
 // Shared secret for HMAC crypto algorithm
@@ -188,7 +193,8 @@ _Parsed JWT body_
 
 #### Present an SD-JWT
 
-In this example we parse the SD-JWT generated in the previous example, and present it by disclosing all, none or selective fields.
+In this example we parse the SD-JWT generated in the previous example, and present it by disclosing all, none or
+selective fields.
 
 In the next example we will show how to parse and verify the presented SD-JWTs.
 
@@ -231,15 +237,19 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NTYiLCJfc2QiOlsiaGx6ZmpmMDRvNVp
 
 #### Parse and verify an SD-JWT using the NimbusDS-based JWT crypto provider
 
-This example shows how to parse and verify the SD-JWT, created and presented in the previous examples, and how to restore its original
+This example shows how to parse and verify the SD-JWT, created and presented in the previous examples, and how to
+restore its original
 payload, with the disclosed payload fields only.
 
 For verification, we use the same shared secret as before and a `MACVerifier` with the `SimpleJWTCryptoProvider`.
 
-The parsing and verification can be done in one step using the `SDJwt.verifyAndParse()` method, throwing an exception if verification fails,
-or in two steps using the `SDJwt.parse()` method followed by the member method `SDJwt.verify()`, which returns true or false.
+The parsing and verification can be done in one step using the `SDJwt.verifyAndParse()` method, throwing an exception if
+verification fails,
+or in two steps using the `SDJwt.parse()` method followed by the member method `SDJwt.verify()`, which returns true or
+false.
 
-The output below shows the restored JWT body payloads, with the selectively disclosable field `sub` disclosed or undisclosed.
+The output below shows the restored JWT body payloads, with the selectively disclosable field `sub` disclosed or
+undisclosed.
 
 ```kotlin
 // Shared secret for HMAC crypto algorithm
@@ -286,10 +296,12 @@ Disclosed JWT payload:
 
 #### Integrate with custom JWT crypto provider
 
-To integrate with your custom JWT crypto provider, on your platform, you need to override and implement the `JWTCryptoProvider` interface,
+To integrate with your custom JWT crypto provider, on your platform, you need to override and implement
+the `JWTCryptoProvider` interface,
 which has two interface methods to sign and verify standard JWT tokens.
 
-In this example, you see how I made use of this interface to implement the JWT crypto provider based on the NimbusDS Jose/JWT library for
+In this example, you see how I made use of this interface to implement the JWT crypto provider based on the NimbusDS
+Jose/JWT library for
 JVM:
 
 ```kotlin
